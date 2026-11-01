@@ -74,8 +74,8 @@ document.documentElement.dataset.theme=pref('theme')||(matchMedia('(prefers-colo
 const mny=v=>CUR=='USDT'?'$'+(v/(M?.fx||90)).toFixed(2):'₹'+Number(v).toFixed(2);
 const alt=v=>CUR=='USDT'?'₹'+Number(v).toFixed(2):'$'+(v/(M?.fx||90)).toFixed(2);
 function say(t,ok){const m=$('toast');m.textContent=t;m.style.background=ok?'var(--ok)':'var(--er)';m.style.display='block';clearTimeout(say.t);say.t=setTimeout(()=>m.style.display='none',4200)}
-async function api(u,b){const r=await fetch(u,b===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});
- const d=await r.json().catch(()=>({}));if(r.status==401&&u!='/api/login'){login();throw 0}if(!r.ok){say(d.detail||'Something went wrong');throw 0}return d}
+async function api(u,b){const r=await fetch('/api/index?path='+encodeURIComponent(u.slice(5)),b===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)});
+ const d=await r.json().catch(()=>({}));if(r.status==401&&u!='/api/login'){login();throw 0}if(!r.ok){say(d.detail||('Server error '+r.status+' ('+u.slice(5)+')'));throw 0}return d}
 const logoHtml=()=>C.logo?`<img src="${esc(C.logo)}" alt="">`:esc((C.store||'S')[0]);
 function login(){M=null;if(C.err){$('view').innerHTML='<div class="login"><div class="card"><h3>Server part not found</h3><p class="mu">The /api part of the site is not running. Check that <b>api/index.js</b> and <b>vercel.json</b> are in the GitHub repo, then redeploy.</p></div></div>';return}$('hd').classList.add('hide');$('nav').classList.add('hide');
  $('view').innerHTML=`<div class="login"><div class="card"><div class="logo">${logoHtml()}</div><h2 style="margin:0">${esc(C.store)}</h2><p class="mu">${C.demo?'Demo mode: sample data only.':'Log in with the Telegram account you use in our bot. Your wallet and orders are shared.'}</p><div id="wg" style="display:flex;justify-content:center;min-height:44px"></div></div></div>`;
@@ -129,6 +129,6 @@ function set(){const r=(ic,t,s,extra,on)=>`<div class="row" ${on?`onclick="${on}
 function tg(){const t=document.documentElement.dataset.theme=='dark'?'light':'dark';document.documentElement.dataset.theme=t;pref('theme',t);draw()}
 function terms2(){sheet(`<h3>Terms & Conditions${X}</h3><ul><li>Orders can’t be cancelled once they start.</li><li>Failed orders are refunded to your wallet automatically.</li><li>Wallet money is used only for orders in this store.</li></ul>`)}
 async function out(){await api('/api/logout',{});login()}
-(async()=>{try{C=await(await fetch('/api/config')).json()}catch(e){C={err:1,store:'Store'}}document.title=C.store||'Store';$('st').textContent=C.store||'Store';$('lg').innerHTML=logoHtml();
- try{await api('/api/me');start()}catch(e){}})();
+(async()=>{try{C=await(await fetch('/api/index?path=config')).json()}catch(e){C={err:1,store:'Store'}}document.title=C.store||'Store';$('st').textContent=C.store||'Store';$('lg').innerHTML=logoHtml();
+ try{await api('/api/me');start()}catch(e){if(!M&&!document.querySelector('.login'))login()}})();
 </script></body></html>
