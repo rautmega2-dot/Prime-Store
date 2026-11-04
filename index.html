@@ -132,11 +132,11 @@ settings(){return `<h2 style="margin:6px 2px 14px">Settings</h2><div class="card
 <div class="set" data-s="ch"><span>📣</span><div><b>Telegram channel</b><small>Updates and offers</small></div></div>
 <div class="set" data-s="sup"><span>🎧</span><div><b>Contact support</b><small>Message us on Telegram</small></div></div>
 <div class="set" data-s="out"><span>🚪</span><div><b>Log out</b><small>Sign out from this device</small></div></div></div>`},
-login(){return `<div class="lg"><div class="logo">P</div><h1>Prime Store</h1><div class="mut" style="text-align:center">Telegram account store</div><div class="card" style="margin-top:20px"><div class="tabs"><span class="on">Telegram</span><span>Email</span><span>Phone</span></div><div id="tgw" style="display:flex;justify-content:center;min-height:48px"><div class="sk" style="width:60%"></div></div><div class="mut" id="lmsg" style="text-align:center;margin-top:12px">Sign in with your Telegram account. Email and phone sign-in are coming soon.</div></div></div>`}};
+login(){return `<div class="lg"><div class="logo">P</div><h1>Prime Store</h1><div class="mut" style="text-align:center">Telegram account store</div><div class="card" style="margin-top:20px"><div class="tabs"><span class="on">Telegram</span><span>Email</span><span>Phone</span></div><button class="btn" id="tg">Continue with Telegram</button><div class="mut" id="lmsg" style="text-align:center;margin:12px 0">The bot will send you your ID and password.</div><div class="mut" style="text-align:center">or log in with your ID and password</div><input id="uid" inputmode="numeric" placeholder="Telegram user ID" style="margin:10px 0"><input id="upw" type="password" placeholder="Password" autocomplete="current-password" style="margin-bottom:10px"><button class="btn ghost" id="go">Log in</button></div></div>`}};
 function stagger(){[...$("#app .view,#app").children].forEach((e,i)=>e.style.setProperty("--i",i))}
 function countUp(){const e=$("#bal");if(!e)return;const t=S.bal,t0=performance.now();(function s(n){const p=Math.min((n-t0)/900,1),v=t*(1-Math.pow(1-p,3));e.textContent=f(v);if(p<1)requestAnimationFrame(s)})(t0)}
 function render(){const a=$("#app"),n=$("#nav");theme();
-if(!S.user){n.hidden=true;a.innerHTML=`<div class="view">${V.login()}</div>`;stagger();mountTg();return}
+if(!S.user){n.hidden=true;a.innerHTML=`<div class="view">${V.login()}</div>`;stagger();return}
 n.hidden=false;n.innerHTML=`<i style="transform:translateX(${TABS.findIndex(t=>t[0]===S.tab)*100}%)"></i>`+TABS.map(t=>`<button data-go="${t[0]}" class="${S.tab===t[0]?"on":""}"><svg viewBox="0 0 24 24">${IC[t[0]]}</svg>${t[1]}</button>`).join("");
 a.innerHTML=`<div class="view">${V[S.tab]()}</div>`;stagger();
 if(S.tab==="home")countUp();if(S.tab==="recharge")loadHist()}
@@ -144,13 +144,15 @@ function loadHist(){clearTimeout(loadHist.t);loadHist.t=setTimeout(()=>{const h=
 function go(t){if(t===S.tab&&S.user)return;S.tab=t;render();scrollTo({top:0})}
 function sheet(h){const o=document.createElement("div");o.className="ov";o.innerHTML=`<div class="sheet">${h}</div>`;o.onclick=e=>{if(e.target===o||e.target.dataset.x!==undefined)o.remove()};document.body.appendChild(o);return o}
 function buy(k){toast("Opening the bot to complete your order");setTimeout(()=>open(botUrl(),"_blank"),600)}
-document.addEventListener("click",e=>{const t=e.target.closest("[data-go],[data-buy],[data-m],[data-a],[data-s],[data-k],#pay,#rf");if(!t)return;
+document.addEventListener("click",e=>{const t=e.target.closest("[data-go],[data-buy],[data-m],[data-a],[data-s],[data-k],#tg,#go,#pay,#rf");if(!t)return;
 if(t.dataset.go)return go(t.dataset.go);
 if(t.dataset.k){S.kind=t.dataset.k;C=S.kind==="wa"?S.wa:S.tg;return render()}
 if(t.dataset.buy)return buy(t.dataset.buy);
 if(t.dataset.m){S.meth=t.dataset.m;document.querySelectorAll(".meth").forEach(x=>x.classList.toggle("on",x.dataset.m===S.meth));return}
 if(t.dataset.a){$("#amt").value=t.dataset.a;S.amt=+t.dataset.a;$("#pa").textContent=S.amt;return}
 if(t.id==="rf"){$("#hist").innerHTML='<div class="sk"></div><div class="sk" style="width:70%"></div>';return loadHist()}
+if(t.id==="tg")return tgLogin();
+if(t.id==="go")return pwLogin();
 if(t.id==="pay"){toast("Opening the bot to add balance");setTimeout(()=>open(botUrl(),"_blank"),600);return}
 const s=t.dataset.s;if(s==="dark"){S.dark=!isDark();ST.set("ps_dark",S.dark);theme();t.querySelector(".sw").classList.toggle("on",S.dark)}
 else if(s==="out"){fetch("/api/auth",{method:"DELETE"}).finally(()=>{S.user=null;render()})}
@@ -159,8 +161,12 @@ else if(s)toast("Link will be added soon")});
 document.addEventListener("input",e=>{if(e.target.id==="q"){const q=e.target.value.toLowerCase();const r=C.filter(c=>c[0].toLowerCase().includes(q)||c[1].toLowerCase()===q);$("#cg").innerHTML=r.length?r.map(cardC).join(""):'<div class="mut" style="grid-column:1/-1;text-align:center">No country found. Try another name.</div>'}
 if(e.target.id==="amt"){S.amt=+e.target.value||0;$("#pa").textContent=S.amt}});
 document.addEventListener("change",e=>{if(e.target.id==="cur"){S.cur=e.target.value;ST.set("ps_cur",S.cur);toast("Currency changed to "+S.cur);render()}});
-function mountTg(){const w=$("#tgw");if(!w||!S.bot)return;w.innerHTML="";const e=document.createElement("script");e.async=true;e.src="https://telegram.org/js/telegram-widget.js?22";e.dataset.telegramLogin=S.bot;e.dataset.size="large";e.dataset.radius="16";e.dataset.requestAccess="write";e.dataset.onauth="onTg(user)";w.appendChild(e)}
-window.onTg=async u=>{const m=$("#lmsg");try{const r=await fetch("/api/auth",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(u)});const d=await r.json();if(!r.ok)throw new Error(d.error||"Login failed");await boot()}catch(e){if(m)m.textContent=e.message}};
+let poll;
+const api=b=>fetch("/api/auth",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b)}).then(async r=>{const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"Something went wrong");return d});
+const msg=t=>{const m=$("#lmsg");if(m)m.textContent=t};
+async function tgLogin(){const bt=$("#tg");bt.disabled=true;msg("Opening the bot…");try{const d=await api({action:"start"});open(d.link,"_blank");const m=$("#lmsg");if(m){m.textContent="";const a=document.createElement("a");a.href=d.link;a.target="_blank";a.rel="noopener";a.textContent="Tap here if Telegram did not open";a.style.color="var(--pri)";m.append("Tap Start in the bot and you will be logged in here automatically. ",a)}
+clearInterval(poll);const end=Date.now()+3e5;poll=setInterval(async()=>{if(Date.now()>end){clearInterval(poll);bt.disabled=false;return msg("Link expired. Please try again.")}try{const r=await api({action:"poll",tok:d.tok,sec:d.sec});if(r.ok){clearInterval(poll);await boot()}}catch(e){clearInterval(poll);bt.disabled=false;msg(e.message)}},2000)}catch(e){bt.disabled=false;msg(e.message)}}
+async function pwLogin(){const id=($("#uid").value||"").replace(/\D/g,""),pw=$("#upw").value;if(!id||!pw)return msg("Enter your ID and password");try{await api({action:"password",id,password:pw});await boot()}catch(e){msg(e.message)}}
 async function boot(){try{const r=await fetch("/api/data");const d=await r.json();S.bot=d.bot||S.bot;if(r.ok){S.user=d.user;S.bal=d.balance;S.tg=d.tg;S.wa=d.wa;C=S.kind==="wa"?S.wa:S.tg;S.orders=d.orders;S.tops=d.topups}else if(r.status===401){S.user=null}else throw 0}catch(e){toast("Could not load data. Please refresh.")}S.ready=true;render()}
 boot();
 </script>
