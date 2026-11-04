@@ -87,6 +87,7 @@ nav svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.9;st
 .hero .btn{background:#fff;color:#4a2fd0;box-shadow:none}
 .cn .fl{width:60px;height:60px;margin:0 auto 6px;display:grid;place-items:center;border-radius:50%;background:var(--line);font-size:32px}
 .cn{background:linear-gradient(180deg,var(--card),transparent 140%)}
+.chips span.on{border-color:var(--pri2);background:var(--card)}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -97,10 +98,10 @@ nav svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.9;st
 <script>
 const $=s=>document.querySelector(s),RATE=90;
 const ST={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
-const S={user:ST.get("ps_user",null),tab:"home",cur:ST.get("ps_cur","INR"),dark:ST.get("ps_dark",null),bal:ST.get("ps_bal",250),orders:ST.get("ps_orders",[]),tops:ST.get("ps_tops",[]),step:0,meth:"UPI",amt:100};
-const save=()=>{ST.set("ps_bal",S.bal);ST.set("ps_orders",S.orders);ST.set("ps_tops",S.tops)};
-const C=[["Afghanistan","AF","+93",75.6,471],["Albania","AL","+355",142.8,46],["Algeria","DZ","+213",84,276],["Andorra","AD","+376",0,0],["Angola","AO","+244",100.8,2],["India","IN","+91",62,1200],["United States","US","+1",118,340],["United Kingdom","GB","+44",96,88]];
-const flag=c=>String.fromCodePoint(...[...c].map(x=>127397+x.charCodeAt(0)));
+const S={user:null,tab:"home",cur:ST.get("ps_cur","INR"),dark:ST.get("ps_dark",null),bal:0,orders:[],tops:[],tg:[],wa:[],kind:"tg",meth:"UPI",amt:100,bot:"",ready:false};
+let C=[];
+const flag=c=>/^[A-Za-z]{2}$/.test(c||"")?String.fromCodePoint(...[...c.toUpperCase()].map(x=>127397+x.charCodeAt(0))):"🌍";
+const botUrl=()=>"https://t.me/"+S.bot;
 const f=n=>S.cur==="INR"?"₹"+n.toFixed(2):"$"+(n/RATE).toFixed(2);
 const f2=n=>S.cur==="INR"?"$"+(n/RATE).toFixed(2):"₹"+n.toFixed(2);
 const IC={home:'<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',buy:'<circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.6 12.4a1 1 0 0 0 1 .8h8.8a1 1 0 0 0 1-.8L20 7H6"/>',recharge:'<rect x="2.5" y="5" width="19" height="14" rx="3"/><path d="M2.5 10h19"/>',orders:'<path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/>',settings:'<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>'};
@@ -117,7 +118,7 @@ home(){const n=S.user.name;return `<div class="top"><div class="logo">P</div><b>
 <div class="g2"><div class="card stat"><span class="mut">Total recharges</span><b>${S.tops.length}</b></div><div class="card stat"><span class="mut">Total orders</span><b>${S.orders.length}</b></div></div>
 <div class="row"><h3>Available countries</h3><a data-go="buy">View all</a></div>
 <div class="g2">${C.slice(0,4).map(cardC).join("")}</div>`},
-buy(){return `<h2 style="margin:6px 2px 14px">Buy accounts</h2><input id="q" placeholder="Search country" autocomplete="off"><br><br><div class="g2" id="cg">${C.map(cardC).join("")}</div>`},
+buy(){return `<h2 style="margin:6px 2px 14px">Buy accounts</h2><div class="chips"><span data-k="tg" class="${S.kind==="tg"?"on":""}">Telegram</span><span data-k="wa" class="${S.kind==="wa"?"on":""}">WhatsApp</span></div><input id="q" placeholder="Search country" autocomplete="off"><br><br><div class="g2" id="cg">${C.map(cardC).join("")}</div>`},
 recharge(){const M=[["UPI","🏦","UPI gateway","Scan QR and pay, auto verified"],["BNB","🪙","Binance Pay","Send to Pay ID and verify"],["CRY","💎","Crypto","USDT via OxaPay"]];
 return `<h2 style="margin:6px 2px 14px">Recharge balance</h2><div class="card"><span class="mut">Current balance</span><div class="big" style="font-size:30px;margin-bottom:0">${f(S.bal)}</div></div>
 ${M.map(m=>`<div class="card meth ${S.meth===m[0]?"on":""}" data-m="${m[0]}"><span class="mi">${m[1]}</span><div><b>${m[2]}</b><span class="mut">${m[3]}</span></div><span class="tag ok">ON</span></div>`).join("")}
@@ -125,45 +126,43 @@ ${M.map(m=>`<div class="card meth ${S.meth===m[0]?"on":""}" data-m="${m[0]}"><sp
 <div class="row"><h3>Recharge history</h3><a id="rf">Refresh</a></div><div class="card" id="hist"><div class="sk"></div><div class="sk" style="width:70%"></div><div class="sk" style="width:85%"></div></div>`},
 orders(){return `<h2 style="margin:6px 2px 14px">Orders</h2><div class="card">`+(S.orders.length?S.orders.map(o=>`<div class="item"><span class="fl" style="font-size:28px">${o.fl}</span><div><b>${o.n}</b><small>${o.id} · ${new Date(o.t).toLocaleString()}</small></div><div style="text-align:right;flex:none"><b>${f(o.p)}</b><small class="${o.s==="Completed"?"ok":""}">${o.s}</small></div></div>`).join(""):`<div class="mut" style="text-align:center;padding:18px 0">No orders yet. Pick a country in Buy to place your first order.</div><button class="btn" data-go="buy">Go to Buy</button>`)+`</div>`},
 settings(){return `<h2 style="margin:6px 2px 14px">Settings</h2><div class="card">
-<div class="set" data-s="bot"><span>🤖</span><div><b>Bot connect</b><small>Telegram ID ${S.user.id} · bot link coming soon</small></div><span class="tag">Test</span></div>
+<div class="set" data-s="bot"><span>🤖</span><div><b>Bot connect</b><small>Telegram ID ${S.user.id} · same wallet as the bot</small></div><span class="tag ok">Live</span></div>
 <div class="set"><span>💱</span><div><b>Currency</b><small>Choose display currency</small></div><select id="cur"><option value="INR" ${S.cur==="INR"?"selected":""}>₹ INR</option><option value="USDT" ${S.cur==="USDT"?"selected":""}>$ USDT</option></select></div>
 <div class="set" data-s="dark"><span>🌙</span><div><b>Dark mode</b><small>Easy on the eyes at night</small></div><span class="sw ${isDark()?"on":""}"></span></div>
 <div class="set" data-s="ch"><span>📣</span><div><b>Telegram channel</b><small>Updates and offers</small></div></div>
 <div class="set" data-s="sup"><span>🎧</span><div><b>Contact support</b><small>Message us on Telegram</small></div></div>
 <div class="set" data-s="out"><span>🚪</span><div><b>Log out</b><small>Sign out from this device</small></div></div></div>`},
-login(){return `<div class="lg"><div class="logo">P</div><h1>Prime Store</h1><div class="mut" style="text-align:center">Telegram account store</div>
-<div class="card" style="margin-top:20px"><div class="tabs"><span class="on">Telegram</span><span title="Coming soon">Email</span><span title="Coming soon">Phone</span></div>`+(S.step?`<span class="mut">Telegram user ID (test mode)</span><input id="uid" inputmode="numeric" placeholder="e.g. 7165806409" style="margin:6px 0 12px"><button class="btn" id="go">Log in now</button>`:`<button class="btn" id="tg">Continue with Telegram</button>`)+`<div class="mut" style="text-align:center;margin-top:12px">Email and phone sign-in are coming soon.</div></div></div>`}};
+login(){return `<div class="lg"><div class="logo">P</div><h1>Prime Store</h1><div class="mut" style="text-align:center">Telegram account store</div><div class="card" style="margin-top:20px"><div class="tabs"><span class="on">Telegram</span><span>Email</span><span>Phone</span></div><div id="tgw" style="display:flex;justify-content:center;min-height:48px"><div class="sk" style="width:60%"></div></div><div class="mut" id="lmsg" style="text-align:center;margin-top:12px">Sign in with your Telegram account. Email and phone sign-in are coming soon.</div></div></div>`}};
 function stagger(){[...$("#app .view,#app").children].forEach((e,i)=>e.style.setProperty("--i",i))}
 function countUp(){const e=$("#bal");if(!e)return;const t=S.bal,t0=performance.now();(function s(n){const p=Math.min((n-t0)/900,1),v=t*(1-Math.pow(1-p,3));e.textContent=f(v);if(p<1)requestAnimationFrame(s)})(t0)}
 function render(){const a=$("#app"),n=$("#nav");theme();
-if(!S.user){n.hidden=true;a.innerHTML=`<div class="view">${V.login()}</div>`;stagger();return}
+if(!S.user){n.hidden=true;a.innerHTML=`<div class="view">${V.login()}</div>`;stagger();mountTg();return}
 n.hidden=false;n.innerHTML=`<i style="transform:translateX(${TABS.findIndex(t=>t[0]===S.tab)*100}%)"></i>`+TABS.map(t=>`<button data-go="${t[0]}" class="${S.tab===t[0]?"on":""}"><svg viewBox="0 0 24 24">${IC[t[0]]}</svg>${t[1]}</button>`).join("");
 a.innerHTML=`<div class="view">${V[S.tab]()}</div>`;stagger();
 if(S.tab==="home")countUp();if(S.tab==="recharge")loadHist()}
-function loadHist(){clearTimeout(loadHist.t);loadHist.t=setTimeout(()=>{const h=$("#hist");if(!h)return;h.innerHTML=S.tops.length?S.tops.map(t=>`<div class="item"><span>${t.m==="UPI"?"🏦":t.m==="BNB"?"🪙":"💎"}</span><div><b>${f(t.a)}</b><small>${new Date(t.t).toLocaleString()}</small></div><span class="tag">${t.s}</span></div>`).join(""):`<div class="mut" style="text-align:center">No recharges yet. Add your first balance above.</div>`},900)}
+function loadHist(){clearTimeout(loadHist.t);loadHist.t=setTimeout(()=>{const h=$("#hist");if(!h)return;h.innerHTML=S.tops.length?S.tops.map(t=>`<div class="item"><span>💰</span><div><b>${f(t.a)}</b><small>${new Date(t.t).toLocaleString()}</small></div><span class="tag">${t.s}</span></div>`).join(""):`<div class="mut" style="text-align:center">No recharges yet. Add your first balance above.</div>`},900)}
 function go(t){if(t===S.tab&&S.user)return;S.tab=t;render();scrollTo({top:0})}
 function sheet(h){const o=document.createElement("div");o.className="ov";o.innerHTML=`<div class="sheet">${h}</div>`;o.onclick=e=>{if(e.target===o||e.target.dataset.x!==undefined)o.remove()};document.body.appendChild(o);return o}
-function buy(k){const c=C.find(x=>x[1]===k);if(!c||!c[4])return;const o=sheet(`<h3>Confirm order</h3><p><span>${flag(k)} ${c[0]} account</span><b>${f(c[3])}</b></p><p class="mut"><span>Your balance</span><span>${f(S.bal)}</span></p><button class="btn" id="ok" style="margin-top:12px">Confirm and buy</button><button class="btn ghost sm" data-x>Cancel</button>`);
-o.querySelector("#ok").onclick=()=>{if(S.bal<c[3]){o.remove();toast("Not enough balance. Add funds first.");go("recharge");return}
-S.bal-=c[3];const od={id:"#"+Math.floor(1e5+Math.random()*9e5),n:c[0]+" account",fl:flag(k),p:c[3],s:"Processing",t:Date.now()};S.orders.unshift(od);save();o.remove();toast("Order placed");render();
-setTimeout(()=>{od.s="Completed";save();toast("Order completed");if(S.tab==="orders"||S.tab==="home")render()},2400)}}
-document.addEventListener("click",e=>{const t=e.target.closest("[data-go],[data-buy],[data-m],[data-a],[data-s],#tg,#go,#pay,#rf");if(!t)return;
+function buy(k){toast("Opening the bot to complete your order");setTimeout(()=>open(botUrl(),"_blank"),600)}
+document.addEventListener("click",e=>{const t=e.target.closest("[data-go],[data-buy],[data-m],[data-a],[data-s],[data-k],#pay,#rf");if(!t)return;
 if(t.dataset.go)return go(t.dataset.go);
+if(t.dataset.k){S.kind=t.dataset.k;C=S.kind==="wa"?S.wa:S.tg;return render()}
 if(t.dataset.buy)return buy(t.dataset.buy);
 if(t.dataset.m){S.meth=t.dataset.m;document.querySelectorAll(".meth").forEach(x=>x.classList.toggle("on",x.dataset.m===S.meth));return}
 if(t.dataset.a){$("#amt").value=t.dataset.a;S.amt=+t.dataset.a;$("#pa").textContent=S.amt;return}
 if(t.id==="rf"){$("#hist").innerHTML='<div class="sk"></div><div class="sk" style="width:70%"></div>';return loadHist()}
-if(t.id==="tg"){S.step=1;return render()}
-if(t.id==="go"){const id=($("#uid").value||"").replace(/\D/g,"");if(id.length<5)return toast("Enter a valid Telegram user ID");S.user={id,name:"User"+id.slice(-4)};ST.set("ps_user",S.user);S.step=0;S.tab="home";return render()}
-if(t.id==="pay"){const a=Math.floor(+$("#amt").value);if(!(a>=10))return toast("Minimum recharge is ₹10");S.amt=a;S.tops.unshift({a,m:S.meth,s:"Test",t:Date.now()});S.bal+=a;save();toast("Test mode: ₹"+a+" added");return render()}
+if(t.id==="pay"){toast("Opening the bot to add balance");setTimeout(()=>open(botUrl(),"_blank"),600);return}
 const s=t.dataset.s;if(s==="dark"){S.dark=!isDark();ST.set("ps_dark",S.dark);theme();t.querySelector(".sw").classList.toggle("on",S.dark)}
-else if(s==="out"){S.user=null;ST.set("ps_user",null);render()}
-else if(s==="bot")toast("Bot link will be added after testing");
+else if(s==="out"){fetch("/api/auth",{method:"DELETE"}).finally(()=>{S.user=null;render()})}
+else if(s==="bot")open(botUrl(),"_blank");
 else if(s)toast("Link will be added soon")});
 document.addEventListener("input",e=>{if(e.target.id==="q"){const q=e.target.value.toLowerCase();const r=C.filter(c=>c[0].toLowerCase().includes(q)||c[1].toLowerCase()===q);$("#cg").innerHTML=r.length?r.map(cardC).join(""):'<div class="mut" style="grid-column:1/-1;text-align:center">No country found. Try another name.</div>'}
 if(e.target.id==="amt"){S.amt=+e.target.value||0;$("#pa").textContent=S.amt}});
 document.addEventListener("change",e=>{if(e.target.id==="cur"){S.cur=e.target.value;ST.set("ps_cur",S.cur);toast("Currency changed to "+S.cur);render()}});
-render();
+function mountTg(){const w=$("#tgw");if(!w||!S.bot)return;w.innerHTML="";const e=document.createElement("script");e.async=true;e.src="https://telegram.org/js/telegram-widget.js?22";e.dataset.telegramLogin=S.bot;e.dataset.size="large";e.dataset.radius="16";e.dataset.requestAccess="write";e.dataset.onauth="onTg(user)";w.appendChild(e)}
+window.onTg=async u=>{const m=$("#lmsg");try{const r=await fetch("/api/auth",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(u)});const d=await r.json();if(!r.ok)throw new Error(d.error||"Login failed");await boot()}catch(e){if(m)m.textContent=e.message}};
+async function boot(){try{const r=await fetch("/api/data");const d=await r.json();S.bot=d.bot||S.bot;if(r.ok){S.user=d.user;S.bal=d.balance;S.tg=d.tg;S.wa=d.wa;C=S.kind==="wa"?S.wa:S.tg;S.orders=d.orders;S.tops=d.topups}else if(r.status===401){S.user=null}else throw 0}catch(e){toast("Could not load data. Please refresh.")}S.ready=true;render()}
+boot();
 </script>
 </body>
 </html>
