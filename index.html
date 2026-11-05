@@ -208,6 +208,27 @@ nav[hidden]{display:none!important}
 .kd.smm{background:rgba(154,123,255,.2);color:#6a47f2}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .kd.smm{color:#c4b2ff}}
 :root[data-theme="dark"] .kd.smm{color:#c4b2ff}
+
+/* rounder */
+.card{border-radius:36px;padding:18px}
+.g2 .card{border-radius:34px}
+.hero{border-radius:40px;padding:20px}
+.btn,.btn.ghost{border-radius:999px;padding:15px}
+.btn.sm{border-radius:999px;padding:10px}
+input,select{border-radius:999px;padding:14px 20px}
+select{padding:9px 14px}
+.chips span,.tabs span{border-radius:999px}
+.cp{border-radius:999px;padding:3px 12px}
+.ic{border-radius:50%}
+.sq .em{border-radius:50%}
+.meth .mi{border-radius:50%}
+.sq{border-radius:36px}
+.pt{border-radius:34px}
+.pt .pi{border-radius:50%}
+.sheet{border-radius:36px 36px 0 0}
+nav{border-radius:40px}
+nav i{border-radius:34px}
+.card.list,.card:has(>.item),.card:has(>.set),.card:has(>.kv),.card:has(>.sel){padding-left:20px;padding-right:20px}
 </style>
 </head>
 <body>
@@ -276,7 +297,7 @@ n.hidden=false;n.innerHTML=`<i style="transform:translateX(${TABS.findIndex(t=>t
 a.innerHTML=`<div class="view">${V[S.tab]()}</div>`;stagger();
 if(S.tab==="home")countUp();if(S.tab==="recharge")loadHist()}
 function loadHist(){clearTimeout(loadHist.t);loadHist.t=setTimeout(()=>{const h=$("#hist");if(!h)return;h.innerHTML=S.tops.length?S.tops.map(t=>`<div class="item"><span>💰</span><div><b>${f(t.a)}</b><small>${esc(t.how||"UPI")} · ${esc(t.id||"")} · ${new Date(t.t).toLocaleString()}</small></div><span class="tag ok">${esc(t.s)}</span></div>`).join(""):`<div class="mut" style="text-align:center">No recharges yet. Add your first balance above.</div>`},250)}
-function go(t){const was=S.sub;S.sub=null;if(t===S.tab&&S.user&&!was)return;S.tab=t;render();scrollTo({top:0})}
+function go(t){const was=S.sub;S.sub=null;if(t===S.tab&&S.user&&!was)return;if(t!==S.tab&&!go.nb){TH.push(S.tab);if(TH.length>30)TH.shift()}S.tab=t;render();scrollTo({top:0})}
 function sheet(h){const o=document.createElement("div");o.className="ov";o.innerHTML=`<div class="sheet">${h}</div>`;o.onclick=e=>{if(e.target===o||e.target.dataset.x!==undefined)o.remove()};document.body.appendChild(o);return o}
 function buy(k){return openBuy(k);toast("Opening the bot to complete your order");setTimeout(()=>open(botUrl(),"_blank"),600)}
 document.addEventListener("click",e=>{const t=e.target.closest("[data-go],[data-buy],[data-m],[data-a],[data-s],[data-k],#tg,#go,#pay,#rf");if(!t)return;
@@ -488,14 +509,22 @@ const up=()=>{if(!el)return;const t=el;el=null;t.style.transition="transform .6s
 document.addEventListener("click",e=>{const t=e.target.closest("[data-stk],[data-of]");if(!t)return;
 if(t.dataset.stk){S.stock=!S.stock;ST.set("ps_stock",S.stock);t.querySelector(".sw").classList.toggle("on",S.stock);const g=$("#cg");if(g)g.innerHTML=buyRows();return}
 if(t.dataset.of){S.of=t.dataset.of;render()}});
-let bk=0,exitArm=0;
-function trap(){try{history.pushState({ps:1},"")}catch(e){}}
+let bk=0,exitArm=0,armed=0;const TH=[];
+/* Chrome (Android) skips history entries that a page adds before the user touched it,
+   so the back-guard is only pushed after a real touch/click, never on page load. */
+function trap(){if(armed)return;try{history.pushState({ps:1},"");armed=1}catch(e){}}
+function arm(){if(S.user)trap()}
 function appBack(){const ov=document.querySelector(".ov");if(ov){ov.remove();return true}
 if(!S.user)return false;
 if(S.sub){const b=document.querySelector("#app .top .ic[data-pb]");if(b)b.click();return true}
-if(S.tab!=="home"){go("home");return true}
+if(TH.length){go.nb=1;go(TH.pop());go.nb=0;return true}
+if(S.tab!=="home"){go.nb=1;go("home");go.nb=0;return true}
 return false}
-function initBack(){if(bk)return;bk=1;trap();addEventListener("popstate",()=>{if(appBack()){trap();return}if(exitArm){exitArm=0;history.back();return}exitArm=1;toast("Press back again to exit");setTimeout(()=>{exitArm=0},2200);trap()})}
+function initBack(){if(bk)return;bk=1;
+["pointerup","touchend","click","keydown"].forEach(n=>addEventListener(n,arm,true));
+if(navigator.userActivation&&navigator.userActivation.hasBeenActive)trap();
+addEventListener("popstate",()=>{armed=0;if(appBack()){trap();return}if(exitArm){exitArm=0;history.back();return}exitArm=1;toast("Press back again to exit");setTimeout(()=>{exitArm=0},2200);trap()})}
+
 boot();
 </script>
 </body>
