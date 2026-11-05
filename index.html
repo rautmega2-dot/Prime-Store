@@ -249,6 +249,29 @@ select{padding:9px 14px}
 nav{border-radius:40px}
 nav i{border-radius:34px}
 .card.list,.card:has(>.item),.card:has(>.set),.card:has(>.kv),.card:has(>.sel){padding-left:20px;padding-right:20px}
+
+/* ===== white balance board (blue Add balance button, stats attached) ===== */
+.hero{background:linear-gradient(180deg,#FFFFFF,#F6F9FF);color:var(--ink);border:1px solid var(--line);text-shadow:none;box-shadow:0 14px 26px -10px var(--shd),inset 0 1.5px 0 var(--hi)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .hero{background:linear-gradient(180deg,var(--cardtop),var(--cardbot))}}
+:root[data-theme="dark"] .hero{background:linear-gradient(180deg,var(--cardtop),var(--cardbot))}
+.hero::before{background:rgba(107,155,255,.16)}
+.hero::after{background:rgba(106,71,242,.08)}
+.hero .mut{color:var(--mut)}
+.hero .btn{background:linear-gradient(135deg,var(--btn1),var(--btn2));color:var(--btnink);box-shadow:0 10px 18px -6px var(--glow),inset 0 2px 0 rgba(255,255,255,.35),inset 0 -3px 6px rgba(10,30,120,.16)}
+.hst{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 14px}
+.hst>div{border-radius:22px;padding:12px 14px;background:var(--inbg);box-shadow:inset 0 2px 5px var(--inb2)}
+.hst span{display:block;font-size:12px;color:var(--mut)}
+.hst b{display:block;font-size:24px;margin-top:2px;font-variant-numeric:tabular-nums}
+
+/* ===== 3D sphere icons everywhere (same look as Recharge) ===== */
+.set>span:first-child,.item>span:first-child,.item>.fl{width:46px;height:46px;flex:none;display:grid;place-items:center;border-radius:50%;font-size:22px;line-height:1;background:radial-gradient(circle at 30% 25%,var(--sph),var(--cardbot) 80%);box-shadow:0 6px 10px -4px var(--shd),inset 0 -3px 6px var(--inb)}
+.item>.fl{font-size:24px!important}
+.item .fl.ob{display:grid;position:relative}
+.set>span:first-child svg.brand{width:26px;height:26px}
+.item .fl svg.brand{width:28px;height:28px}
+.view>div[style*="font-size:52px"],.view>div[style*="font-size:56px"]{width:96px;height:96px;margin:4px auto 12px;padding:0!important;display:grid;place-items:center;border-radius:50%;background:radial-gradient(circle at 30% 25%,var(--sph),var(--cardbot) 80%);box-shadow:0 12px 20px -8px var(--shd),inset 0 -6px 12px var(--inb)}
+.chips span>span{flex:none;padding:0;border:0;background:none;box-shadow:none;border-radius:0}
+.chips.ofl span{flex:none;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -284,8 +307,7 @@ const V={
 home(){const n=S.user.name;return `<div class="top"><div class="logo">${LOGO}</div><b>Prime Store</b><span class="sp"></span><button class="ic" data-go="settings" aria-label="Settings">⚙</button></div>
 <div class="hi"><span class="mut">Welcome back,</span><h1>${n}</h1></div><br>
 <div class="card"><b>Prime Store</b><div class="mut">Fast and secure account buying. Pick a country to see live stock and price.</div></div>
-<div class="card hero"><span class="mut">Total balance</span><div class="big" id="bal">${f(S.bal)}</div><div class="mut" style="margin:-8px 0 12px">${f2(S.bal)}</div><button class="btn" data-go="recharge">+ Add balance</button></div>
-<div class="g2"><div class="card stat"><span class="mut">Total recharges</span><b>${S.tops.length}</b></div><div class="card stat"><span class="mut">Total orders</span><b>${S.orders.length}</b></div></div>
+<div class="card hero"><span class="mut">Total balance</span><div class="big" id="bal">${f(S.bal)}</div><div class="mut" style="margin:-8px 0 14px">${f2(S.bal)}</div><div class="hst"><div><span>Total recharges</span><b>${S.tops.length}</b></div><div><span>Total orders</span><b>${S.orders.length}</b></div></div><button class="btn" data-go="recharge">+ Add balance</button></div>
 <div class="g2 tiles"><div class="card sq" data-smm="1"><span class="em">🚀</span><div><b>Social Media Services</b><span class="mut">Followers, likes, views and more</span></div></div><div class="card sq alt" data-go="orders"><span class="em">📦</span><div><b>My Orders</b><span class="mut">${S.orders.length} total · track status</span></div></div></div>
 <div class="row"><h3>Available countries</h3><a data-go="buy">View all</a></div>
 <div class="g2">${C.slice(0,4).map(cardC).join("")}</div>`},
@@ -302,10 +324,7 @@ settings(){return `<h2 style="margin:6px 2px 14px">Settings</h2><div class="card
 <div class="set" data-s="dark"><span>🌙</span><div><b>Dark mode</b><small>Easy on the eyes at night</small></div><span class="sw ${isDark()?"on":""}"></span></div>
 <div class="set" data-s="ch"><span>${brand("tg")}</span><div><b>Telegram channel</b><small>Updates and offers</small></div></div>
 <div class="set" data-s="sup"><span>🎧</span><div><b>Contact support</b><small>Message us on Telegram</small></div></div>
-<div class="set" data-help="help"><span>📖</span><div><b>How it works</b><small>A quick guide</small></div></div>
-<div class="set" data-help="hbuy"><span>🛒</span><div><b>How to buy</b><small>Your first order in 3 steps</small></div></div>
-<div class="set" data-help="hrch"><span>💳</span><div><b>How to recharge</b><small>Add money to your wallet</small></div></div>
-<div class="set" data-help="hsell"><span>💼</span><div><b>How to sell</b><small>Got accounts or stock to sell?</small></div></div>
+<div class="set" data-help="hmenu"><span>📖</span><div><b>Help</b><small>How it works, buy, recharge, sell</small></div><span class="ch">›</span></div>
 <div class="set" data-s="out"><span>🚪</span><div><b>Log out</b><small>Sign out from this device</small></div></div></div>`},
 login(){return `<div class="lg"><div class="logo">${LOGO}</div><h1>Prime Store</h1><div class="mut" style="text-align:center">Telegram account store</div><div class="card" style="margin-top:20px"><div class="tabs"><span class="on">Telegram</span><span>Email</span><span>Phone</span></div><button class="btn" id="tg">${brand("tg")}Continue with Telegram</button><div class="mut" id="lmsg" style="text-align:center;margin:12px 0">The bot will send you your ID and password.</div><div class="mut" style="text-align:center">or log in with your ID and password</div><input id="uid" inputmode="numeric" placeholder="Telegram user ID" style="margin:10px 0"><input id="upw" type="password" placeholder="Password" autocomplete="current-password" style="margin-bottom:10px"><button class="btn ghost" id="go">Log in</button></div></div>`}};
 let RO,LASTKEY=null,FIRST=true,SWAP=false;
@@ -434,7 +453,7 @@ if(t.dataset.ord!==undefined){const[k,i]=t.dataset.ord.split(":");return openOrd
 if(t.id==="odr")return odAction("refresh");if(t.id==="odl")return odAction("refill");
 if(t.id==="sgo"){if(t.dataset.fund){S.sub=null;return go("recharge")}return smmPlace()}
 if(t.dataset.pick!==undefined){SM.pick=t.dataset.pick;SM.q="";render();return scrollTo({top:0})}
-if(t.dataset.pb!==undefined){const v=t.dataset.pb;if(v==="pick"){SM.pick=null;return render()}if(v==="toplat"){SM.pick="plat";SM.q="";render();return scrollTo({top:0})}if(v==="again")return smmOpen();
+if(t.dataset.pb!==undefined){const v=t.dataset.pb;if(v==="pick"){SM.pick=null;return render()}if(v==="toplat"){SM.pick="plat";SM.q="";render();return scrollTo({top:0})}if(v==="again")return smmOpen();if(v==="hmenu"){HP="hmenu";render();return scrollTo({top:0})}
 if(v==="paydone"){clearInterval(PY.t);S.sub=null;S.tab="recharge";render();return scrollTo({top:0})}
 if(v==="payback"){if(PY.step==="pay"&&PY.m!=="bpay"&&!PY.res){clearInterval(PY.t);PY.step="amt";PY.err="";PY.inv=null;return render()}clearInterval(PY.t);S.sub=null;S.tab="recharge";render();return scrollTo({top:0})}if(v==="orders"){S.sub=null;S.tab="orders";render();return scrollTo({top:0})}S.sub=null;render();return scrollTo({top:0})}
 if(t.dataset.sp!==undefined)return pickPlat(t.dataset.sp);
@@ -525,11 +544,15 @@ async function tosAccept(){S.user.tos=true;act({action:"tos_ok"}).catch(()=>{});
 V.join=()=>`<div class="top"><div class="logo">${LOGO}</div><b>Prime Store</b></div><h2 style="margin:14px 2px 8px">🔒 Join to continue</h2><div class="card mut">To use Prime Store you must join our channel(s) first. After joining, tap <b>I've joined</b>.</div>${(S.join||[]).map(j=>j.link?`<a class="btn ghost" href="${esc(j.link)}" target="_blank" rel="noopener" style="display:block;text-align:center;text-decoration:none;margin-bottom:10px">${esc(j.label)}</a>`:`<div class="card">${esc(j.label)}</div>`).join("")}<button class="btn" id="joinok">✅ I've joined</button>`;
 function needJoin(r){if(r&&r.out&&r.out.join&&r.out.join.length){S.join=r.out.join;S.sub="join";render();return true}return false}
 async function joinCheck(manual){try{const j=await act({action:"join_check"});const r=await jobWait(j.id);const m=(r.out||{}).missing||[];if(r.status==="done"&&m.length){S.join=m;S.sub="join";render();if(manual)toast("Please join first, then tap again")}else if(r.status==="done"&&S.sub==="join"){S.sub=null;render();if(manual)toast("Thanks! You're in ✅")}}catch(e){if(manual)toast(e.message||"Please try again")}}
-const HELP={help:["How it works",()=>`<div class="card mut">1️⃣ <b>Add funds</b> — pay by UPI, Binance Pay or crypto, and your wallet is credited automatically.<br><br>2️⃣ <b>Telegram / WhatsApp account</b> — pick a country, buy, then tap <b>Get code</b> when the code arrives. WhatsApp numbers are refunded if no code comes.<br><br>3️⃣ <b>Social media</b> — pick a platform and service, send your link and quantity, confirm.<br><br>4️⃣ <b>Orders</b> — every order has an ID. Check it any time under <b>Orders</b>.</div><div class="mut" style="margin:0 2px">⚠️ A number cannot be refunded after it has been delivered. Social media orders that fail are refunded to your wallet automatically.</div>`],
+const HELP={hmenu:["Help",()=>`<div class="mut" style="margin:0 2px 12px">Pick a guide</div><div class="card"><div class="set" data-help="help"><span>📖</span><div><b>How it works</b><small>A quick guide</small></div><span class="ch">›</span></div>
+<div class="set" data-help="hbuy"><span>🛒</span><div><b>How to buy</b><small>Your first order in 3 steps</small></div><span class="ch">›</span></div>
+<div class="set" data-help="hrch"><span>💳</span><div><b>How to recharge</b><small>Add money to your wallet</small></div><span class="ch">›</span></div>
+<div class="set" data-help="hsell"><span>💼</span><div><b>How to sell</b><small>Got accounts or stock to sell?</small></div><span class="ch">›</span></div></div>`],
+help:["How it works",()=>`<div class="card mut">1️⃣ <b>Add funds</b> — pay by UPI, Binance Pay or crypto, and your wallet is credited automatically.<br><br>2️⃣ <b>Telegram / WhatsApp account</b> — pick a country, buy, then tap <b>Get code</b> when the code arrives. WhatsApp numbers are refunded if no code comes.<br><br>3️⃣ <b>Social media</b> — pick a platform and service, send your link and quantity, confirm.<br><br>4️⃣ <b>Orders</b> — every order has an ID. Check it any time under <b>Orders</b>.</div><div class="mut" style="margin:0 2px">⚠️ A number cannot be refunded after it has been delivered. Social media orders that fail are refunded to your wallet automatically.</div>`],
 hbuy:["How to buy",()=>`<div class="mut" style="margin:0 2px 12px">Your first order in 3 simple steps</div><div class="card mut">1️⃣ <b>Add funds</b><br>Top up your wallet with UPI, Binance Pay or Crypto. It is credited automatically.<br><br>2️⃣ <b>Pick a service</b><br>Choose Telegram numbers, WhatsApp numbers or Social Media services.<br><br>3️⃣ <b>Confirm and receive</b><br>Numbers: tap <b>Get code</b> when the code arrives. Social media: send your link and quantity, then confirm.</div><div class="mut" style="margin:0 2px 12px">⚠️ A delivered number cannot be refunded. Failed social media orders are refunded to your wallet automatically.</div><button class="btn" data-go="recharge">💳 Add funds</button><button class="btn ghost sm" data-go="home">🛒 Start buying</button>`],
 hrch:["How to recharge",()=>{const c=CF(),a=[];if((c.upi||{}).on)a.push("💳 <b>UPI</b><br>Pick an amount, pay exactly that amount by QR or UPI ID, then enter your UTR and tap Verify.");if((c.bpay||{}).on)a.push("🅱️ <b>Binance Pay</b><br>Send USDT to the Pay ID, then enter your Order ID and tap Verify.");if((c.crypto||{}).on)a.push("🪙 <b>Crypto</b><br>Pick an amount, tap Pay now and pay with any coin. Your wallet is credited after the network confirms.");return `<div class="mut" style="margin:0 2px 12px">Add money to your wallet in a minute</div>${a.length?a.map(x=>`<div class="card mut">${x}</div>`).join(""):'<div class="card mut">No payment method is set up yet. Please contact support.</div>'}<button class="btn" data-go="recharge">💳 Add funds</button>`}],
 hsell:["How to sell",()=>{const u=CF().support;return `<div class="mut" style="margin:0 2px 12px">Got accounts or stock to sell? We buy them.</div><div class="card mut">1️⃣ <b>Message support</b><br>Tell us what you have: the type, the quantity and your price.<br><br>2️⃣ <b>We check it</b><br>Our team reviews the details and replies with an offer.<br><br>3️⃣ <b>Deliver and get paid</b><br>Once the deal is agreed and the items are verified, you receive your payment.</div>${u?`<a class="btn" href="https://t.me/${esc(u)}" target="_blank" rel="noopener" style="display:block;text-align:center;text-decoration:none">🎧 Contact support</a>`:""}`}]};
-V.help=()=>{const h=HELP[HP]||HELP.help;return topBar(h[0],"exit")+h[1]()};
+V.help=()=>{const h=HELP[HP]||HELP.help;return topBar(h[0],HP==="hmenu"?"exit":"hmenu")+h[1]()};
 
 document.addEventListener("pointerdown",e=>{const b=e.target.closest(".btn:not(:disabled)");if(!b)return;const r=b.getBoundingClientRect(),d=Math.max(r.width,r.height)*1.6,s=document.createElement("span");s.className="rp";s.style.cssText="width:"+d+"px;height:"+d+"px;left:"+(e.clientX-r.left-d/2)+"px;top:"+(e.clientY-r.top-d/2)+"px";b.appendChild(s);setTimeout(()=>s.remove(),700)});
 (function(){const sel=".cn,.sq,.hero,.stat,.meth,.ord";let el=null;
