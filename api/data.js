@@ -1,4 +1,15 @@
 const L = require("./_lib");
+const CANCELLED = ["canceled", "cancelled", "refunded", "fail", "failed", "rejected"];
+const smmNote = (st) => {
+  const low = String(st || "").toLowerCase();
+  if (low === "" || low === "pending") return "The order is queued and has not started yet.";
+  if (low === "in progress" || low === "processing") return "The provider is delivering this order.";
+  if (low === "completed") return "The provider marked this order complete. The quantity should now be delivered.";
+  if (low === "partial") return "Only part of the quantity was delivered. The rest was refunded to your wallet.";
+  if (CANCELLED.includes(low)) return "This order was cancelled and the money was refunded.";
+  if (low === "checking") return "We are confirming this order with the provider. You'll get a message soon.";
+  return "Status: " + st;
+};
 const ts = (v) => { v = Number(v) || 0; return v > 1e12 ? v : v * 1000; };
 
 // Read-only: everything the site shows, straight from the bot's MongoDB mirror.
@@ -16,6 +27,35 @@ module.exports = async (req, res) => {
       const d = await db.collection("web_smm").findOne({ _id: String(pk) });
       return res.json({ services: (d && d.services) || [] });
     }
+    // full details of one order (like the status page in the bot): /api/data?order=smm:123  (smm | num | wa)
+    const od = req.query && req.query.order;
+    if (od) {
+      const [k, i] = String(od).split(":");
+      const col = { smm: "smm_orders", num: "number_orders", wa: "wa_orders" }[k];
+      const id = Number(i);
+      if (!col || !Number.isInteger(id)) return res.status(400).json({ error: "Bad request" });
+      const r = await db.collection(col).findOne({ _id: id, user_id: u.id });
+      if (!r) return res.status(404).json({ error: "Order not found" });
+      const base = { k, rid: r._id, oid: r.oid || "", name: r.name || "", status: r.status || "", cost: (r.cost || 0) / 100, refunded: (r.refunded || 0) / 100, created: ts(r.created) };
+      if (k === "smm") {
+        const st = r.status || "Pending", low = st.toLowerCase();
+        const [sv, pl] = await Promise.all([
+          db.collection("smm_services").findOne({ _id: r.service_id }),
+          db.collection("web_smm").findOne({ "services.id": r.service_id }, { projection: { label: 1 } }),
+        ]);
+        return res.json({
+          ...base, status: st, plat: (pl && pl.label) || "", qty: r.qty || 0, link: r.link || "", start: r.start_count || "",
+          remains: r.remains != null ? r.remains : low === "completed" ? 0 : r.qty || 0,
+          note: smmNote(st), canRefill: !!(sv && sv.refill) && ["completed", "partial"].includes(low),
+          canRefresh: !r.final && !!r.provider_order,
+        });
+      }
+      const low = String(r.status || "").toLowerCase();
+      return res.json({
+        ...base, number: r.number || "", op: r.op && r.op !== "auto" ? r.op : "", code: r.code_text || "", pass: r.pass_text || "",
+        note: low === "bought" ? "Use the bot to get your code for now." : low === "checking" ? "This order is being checked. You'll get a message soon." : "",
+      });
+    }
     const mine = { user_id: u.id };
     const [w, tg, wa, smm, num, wao, tops, plats] = await Promise.all([
       db.collection("wallet").findOne({ _id: u.id }),
@@ -28,11 +68,11 @@ module.exports = async (req, res) => {
       db.collection("web_smm").find({}, { projection: { services: 0 } }).sort({ o: 1 }).toArray(),
     ]);
     const c = (x) => [x.name, x.code, x.num || "", x.my_price, x.qty || 0];
-    const o = (r, id, fl, n) => ({ id, n, fl, p: (r.cost || 0) / 100, s: r.status || "", t: ts(r.created) });
+    const o = (r, id, fl, n, k) => ({ id, n, fl, k, i: r._id, p: (r.cost || 0) / 100, s: r.status || "", t: ts(r.created) });
     const orders = [
-      ...smm.map((r) => o(r, r.oid || "#S" + r._id, "🚀", r.name || "SMM order")),
-      ...num.map((r) => o(r, "#T" + r._id, "✈️", (r.country || r.name || "Telegram") + " Telegram")),
-      ...wao.map((r) => o(r, "#W" + r._id, "💬", (r.country || r.name || "WhatsApp") + " WhatsApp")),
+      ...smm.map((r) => o(r, r.oid || "#S" + r._id, "🚀", r.name || "SMM order", "smm")),
+      ...num.map((r) => o(r, r.oid || "#T" + r._id, "✈️", (r.country || r.name || "Telegram") + " Telegram", "num")),
+      ...wao.map((r) => o(r, r.oid || "#W" + r._id, "💬", (r.country || r.name || "WhatsApp") + " WhatsApp", "wa")),
     ].sort((a, b) => b.t - a.t).slice(0, 40);
     res.json({
       bot,
