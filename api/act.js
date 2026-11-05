@@ -11,6 +11,9 @@ const rid = (b) => { const r = int(b.rid); return r ? { rid: r } : null; };
 //
 // POST {action: <name>, ...}  -> {id}                       (see JOBS below)
 // POST {action: "job", id}    -> {status, error, note, out}  status: new | working | done | error | checking | expired
+// Background helpers: they never move money, so they neither wait for nor block the one-request-at-a-time rule.
+const LIGHT = ["set_cur", "tos_ok", "join_check", "crypto_check", "smm_refresh"];
+
 const JOBS = {
   smm: ["smm", (b) => { const sid = int(b.service_id), qty = int(b.qty), cost = int(b.cost), link = str(b.link, /\S/, 400); return sid && qty && cost && link ? { sid, link, qty, cost } : null; }],
   refresh: ["smm_refresh", rid],
@@ -56,7 +59,7 @@ module.exports = async (req, res) => {
     const fields = def[1](b);
     if (!fields) return res.status(400).json({ error: "Please check what you entered." });
     // one request at a time per user, so a double tap can never run twice
-    const busy = await jobs.findOne({ uid: u.id, status: { $in: ["new", "working"] }, exp: { $gt: now() } });
+    const busy = !LIGHT.includes(def[0]) && await jobs.findOne({ uid: u.id, type: { $nin: LIGHT }, status: { $in: ["new", "working"] }, exp: { $gt: now() } });
     if (busy) return res.status(429).json({ error: "Your previous request is still running. Please wait a few seconds." });
     const id = crypto.randomBytes(12).toString("hex");
     await jobs.insertOne({ _id: id, type: def[0], uid: u.id, ...fields, status: "new", created: now(), exp: now() + 90 });
