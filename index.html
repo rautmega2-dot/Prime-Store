@@ -88,6 +88,18 @@ nav svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.9;st
 .cn .fl{width:60px;height:60px;margin:0 auto 6px;display:grid;place-items:center;border-radius:50%;background:var(--line);font-size:32px}
 .cn{background:linear-gradient(180deg,var(--card),transparent 140%)}
 .chips span.on{border-color:var(--pri2);background:var(--card)}
+.tiles{margin-top:14px}
+.sq{aspect-ratio:1;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;padding:16px;transition:transform .2s}
+.sq:active{transform:scale(.97)}
+.sq .em{width:54px;height:54px;border-radius:18px;display:grid;place-items:center;font-size:28px;background:linear-gradient(135deg,var(--btn1),var(--btn2));box-shadow:0 8px 20px rgba(108,77,246,.38)}
+.sq.alt .em{background:var(--line);box-shadow:none}
+.sq b{display:block;font-size:17px;line-height:1.2}
+.sq .mut{display:block;margin-top:4px}
+.sheet.tall{max-height:88vh;overflow-y:auto;overscroll-behavior:contain}
+.sx{display:flex;align-items:center;gap:10px;margin-bottom:12px}.sx h3{flex:1;font-size:18px}
+.svr{padding:12px 0;border-bottom:1px solid var(--line);cursor:pointer}.svr:last-child{border:0}.svr b{display:block}.svr small{color:var(--mut)}
+.tot{display:flex;justify-content:space-between;margin:12px 2px 4px;font-weight:700}
+.err{color:var(--bad);font-size:13px;margin:8px 2px;min-height:18px}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -116,6 +128,7 @@ home(){const n=S.user.name;return `<div class="top"><div class="logo">P</div><b>
 <div class="card"><b>Prime Store</b><div class="mut">Fast and secure account buying. Pick a country to see live stock and price.</div></div>
 <div class="card hero"><span class="mut">Total balance</span><div class="big" id="bal">${f(S.bal)}</div><div class="mut" style="margin:-8px 0 12px">${f2(S.bal)}</div><button class="btn" data-go="recharge">+ Add balance</button></div>
 <div class="g2"><div class="card stat"><span class="mut">Total recharges</span><b>${S.tops.length}</b></div><div class="card stat"><span class="mut">Total orders</span><b>${S.orders.length}</b></div></div>
+<div class="g2 tiles"><div class="card sq" data-smm="1"><span class="em">🚀</span><div><b>Social Media Services</b><span class="mut">Followers, likes, views and more</span></div></div><div class="card sq alt" data-go="orders"><span class="em">📦</span><div><b>My Orders</b><span class="mut">${S.orders.length} total · track status</span></div></div></div>
 <div class="row"><h3>Available countries</h3><a data-go="buy">View all</a></div>
 <div class="g2">${C.slice(0,4).map(cardC).join("")}</div>`},
 buy(){return `<h2 style="margin:6px 2px 14px">Buy accounts</h2><div class="chips"><span data-k="tg" class="${S.kind==="tg"?"on":""}">Telegram</span><span data-k="wa" class="${S.kind==="wa"?"on":""}">WhatsApp</span></div><input id="q" placeholder="Search country" autocomplete="off"><br><br><div class="g2" id="cg">${C.map(cardC).join("")}</div>`},
@@ -167,7 +180,52 @@ const msg=t=>{const m=$("#lmsg");if(m)m.textContent=t};
 async function tgLogin(){const bt=$("#tg");bt.disabled=true;msg("Opening the bot…");try{const d=await api({action:"start"});open(d.link,"_blank");const m=$("#lmsg");if(m){m.textContent="";const a=document.createElement("a");a.href=d.link;a.target="_blank";a.rel="noopener";a.textContent="Tap here if Telegram did not open";a.style.color="var(--pri)";m.append("Tap Start in the bot and you will be logged in here automatically. ",a)}
 clearInterval(poll);const end=Date.now()+3e5;poll=setInterval(async()=>{if(Date.now()>end){clearInterval(poll);bt.disabled=false;return msg("Link expired. Please try again.")}try{const r=await api({action:"poll",tok:d.tok,sec:d.sec});if(r.ok){clearInterval(poll);await boot()}}catch(e){clearInterval(poll);bt.disabled=false;msg(e.message)}},2000)}catch(e){bt.disabled=false;msg(e.message)}}
 async function pwLogin(){const id=($("#uid").value||"").replace(/\D/g,""),pw=$("#upw").value;if(!id||!pw)return msg("Enter your ID and password");try{await api({action:"password",id,password:pw});await boot()}catch(e){msg(e.message)}}
-async function boot(){try{const r=await fetch("/api/data");const d=await r.json();S.bot=d.bot||S.bot;if(r.ok){S.user=d.user;S.bal=d.balance;S.tg=d.tg;S.wa=d.wa;C=S.kind==="wa"?S.wa:S.tg;S.orders=d.orders;S.tops=d.topups}else if(r.status===401){S.user=null}else throw 0}catch(e){toast("Could not load data. Please refresh.")}S.ready=true;render()}
+async function boot(){try{const r=await fetch("/api/data");const d=await r.json();S.bot=d.bot||S.bot;if(r.ok){S.user=d.user;S.bal=d.balance;S.tg=d.tg;S.wa=d.wa;C=S.kind==="wa"?S.wa:S.tg;S.orders=d.orders;S.tops=d.topups;S.plats=d.plats||[]}else if(r.status===401){S.user=null}else throw 0}catch(e){toast("Could not load data. Please refresh.")}S.ready=true;render()}
+/* ---------- Social media services (home tile -> platform -> service -> order form) ---------- */
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const SM={step:"plat",plat:null,plabel:"",list:null,svc:null,cache:{},res:null};
+const smBox=()=>document.getElementById("sm");
+const smClose=()=>{const b=smBox();if(b)b.closest(".ov").remove()};
+const smCost=(s,q)=>Math.max(1,Math.ceil(+(s.r*q/1000*100).toFixed(6))); // paise, same formula as the bot
+const smQty=()=>parseInt((($("#sn")||{}).value||"").replace(/,/g,""),10);
+const smRows=(L,q)=>{q=(q||"").toLowerCase().trim();const r=L.filter(s=>!q||s.n.toLowerCase().includes(q)||String(s.id)===q);
+return r.length?r.slice(0,100).map(s=>`<div class="svr" data-ss="${s.id}"><b>${esc(s.n)}</b><small>${f(s.r)} per 1,000 · Min ${s.lo} · Max ${s.hi}</small></div>`).join("")+(r.length>100?`<div class="mut" style="text-align:center;padding:10px">Showing 100 of ${r.length}. Search to narrow it down.</div>`:""):'<div class="mut" style="text-align:center;padding:16px">No service found.</div>'};
+const act=b=>fetch("/api/act",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b)}).then(async r=>{const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"Something went wrong");return d});
+async function reload(){try{const r=await fetch("/api/data");if(!r.ok)return;const d=await r.json();S.bal=d.balance;S.orders=d.orders;S.tops=d.topups;S.plats=d.plats||[];if(S.tab!=="recharge")render()}catch(e){}}
+function smmOpen(){SM.step="plat";SM.svc=null;SM.res=null;const o=sheet('<div id="sm"></div>');o.firstChild.classList.add("tall");smmDraw()}
+function smmDraw(){const b=smBox();if(!b)return;const X='<button class="ic" data-x aria-label="Close">✕</button>';
+if(SM.step==="plat"){const P=S.plats||[];
+b.innerHTML=`<div class="sx"><h3>Social media services</h3>${X}</div><div class="mut" style="margin-bottom:12px">Which service do you need? Pick a platform.</div>`+(P.length?`<div class="g2">${P.map(p=>{const i=p[1].indexOf(" ");return `<div class="card cn" data-sp="${esc(p[0])}"><div class="fl">${esc(i>0?p[1].slice(0,i):"🌐")}</div><div class="nm">${esc(i>0?p[1].slice(i+1):p[1])}</div><div class="mut">${p[2]} services</div></div>`}).join("")}</div>`:'<div class="mut" style="text-align:center;padding:20px 0">No services are available right now. Please check back soon.</div>')}
+else if(SM.step==="svc"){
+b.innerHTML=`<div class="sx"><button class="ic" data-sb="plat" aria-label="Back">←</button><h3>${esc(SM.plabel)}</h3>${X}</div><input id="sq" placeholder="Search service" autocomplete="off" style="margin-bottom:6px"><div id="svl">${SM.list?smRows(SM.list,""):'<div class="sk"></div><div class="sk" style="width:70%"></div><div class="sk" style="width:85%"></div>'}</div>`}
+else if(SM.step==="form"){const s=SM.svc;
+b.innerHTML=`<div class="sx"><button class="ic" data-sb="svc" aria-label="Back">←</button><h3>Place order</h3>${X}</div><div class="card" style="margin-bottom:12px"><b>${esc(s.n)}</b><div class="mut">${f(s.r)} per 1,000 · Min ${s.lo} · Max ${s.hi} · Refill: ${s.rf?"Yes":"No"}</div></div><span class="mut">Link</span><input id="sl" placeholder="https://… or @username" autocomplete="off" autocapitalize="off" style="margin:6px 0 12px"><span class="mut">Quantity</span><input id="sn" type="number" inputmode="numeric" placeholder="${s.lo} to ${s.hi}" style="margin:6px 0 4px"><div class="tot"><span>Total</span><span id="stot">${f(0)}</span></div><div class="mut" style="margin:0 2px">Balance: ${f(S.bal)}</div><div class="err" id="serr"></div><button class="btn" id="sgo">Place order</button>`}
+else if(SM.step==="done"){const r=SM.res;
+b.innerHTML=`<div class="sx"><h3>Order placed</h3>${X}</div><div style="text-align:center;padding:6px 0 14px"><div style="font-size:54px">✅</div><div class="mut">${esc(r.name)}</div></div><div class="card"><div class="item"><div><small>Order ID</small><b style="word-break:break-all">${esc(r.oid)}</b></div></div><div class="item"><div><small>Quantity</small><b>${r.qty}</b></div><div style="text-align:right;flex:none"><small>Charged</small><b>${f(r.cost)}</b></div></div></div><button class="btn" data-sb="orders">View orders</button><button class="btn ghost sm" data-sb="plat">Order more</button>`}
+else if(SM.step==="check"){const r=SM.res;
+b.innerHTML=`<div class="sx"><h3>Order is being checked</h3>${X}</div><div style="text-align:center;padding:6px 0 14px"><div style="font-size:54px">⏳</div></div><div class="card mut">${esc(r.error||"We are confirming this order. Please do not order again. You will get the result in your Orders and on Telegram.")}${r.oid?"<br><br>Order ID: <b>"+esc(r.oid)+"</b>":""}</div><button class="btn" data-sb="orders">View orders</button>`}}
+function smmCalc(){const s=SM.svc;if(!s||SM.step!=="form"||!smBox())return;const q=smQty(),ok=q>=s.lo&&q<=s.hi,c=ok?smCost(s,q)/100:0,g=$("#sgo"),e=$("#serr");
+$("#stot").textContent=f(c);if(ok&&c>S.bal){e.textContent="You need "+f(c-S.bal)+" more.";g.textContent="Add funds";g.dataset.fund="1"}else{if(e.textContent.startsWith("You need"))e.textContent="";g.textContent="Place order";delete g.dataset.fund}}
+function smmBusy(on){["#sgo","#sl","#sn"].forEach(k=>{const e=$(k);if(e)e.disabled=on});const g=$("#sgo");if(g)g.textContent=on?"Placing order…":"Place order"}
+async function smmWait(id){const end=Date.now()+105e3;while(Date.now()<end){await new Promise(r=>setTimeout(r,1500));try{const r=await act({action:"job",id});if(["done","error","checking","expired"].includes(r.status))return r}catch(e){}}return{status:"checking",error:"We could not confirm it yet. Please check your Orders before trying again."}}
+async function smmPlace(){const s=SM.svc,link=$("#sl").value.trim(),q=smQty(),e=$("#serr");
+if(!link){e.textContent="Enter the link for this order.";return}
+if(!(q>=s.lo&&q<=s.hi)){e.textContent="Enter a quantity between "+s.lo+" and "+s.hi+".";return}
+e.textContent="";smmBusy(true);
+try{const d=await act({action:"smm",service_id:s.id,link,qty:q,cost:smCost(s,q)});const r=await smmWait(d.id);
+if(!smBox()){toast(r.status==="done"?"Order placed ✅":(r.error||"Your order is being checked"));return reload()}
+if(r.status==="error"||r.status==="expired"){smmBusy(false);smmCalc();const x=$("#serr");if(x)x.textContent=r.error||"Could not place the order.";return reload()}
+SM.res=r;SM.step=r.status==="done"?"done":"check";smmDraw();reload()}
+catch(err){if(smBox()){smmBusy(false);const x=$("#serr");if(x)x.textContent=err.message}}}
+document.addEventListener("click",e=>{const t=e.target.closest("[data-smm],[data-sp],[data-ss],[data-sb],#sgo");if(!t)return;
+if(t.dataset.smm!==undefined)return smmOpen();
+if(t.id==="sgo"){if(t.dataset.fund){smmClose();return go("recharge")}return smmPlace()}
+if(t.dataset.sb!==undefined){const v=t.dataset.sb;if(v==="orders"){smmClose();return go("orders")}SM.step=v;return smmDraw()}
+if(t.dataset.sp!==undefined){const k=t.dataset.sp,p=(S.plats||[]).find(x=>x[0]===k);SM.plat=k;SM.plabel=p?p[1]:k;SM.step="svc";SM.list=SM.cache[k]||null;smmDraw();
+if(!SM.list)fetch("/api/data?plat="+encodeURIComponent(k)).then(r=>r.ok?r.json():Promise.reject()).then(d=>{SM.cache[k]=d.services||[];if(SM.plat===k){SM.list=SM.cache[k];const l=$("#svl");if(l&&SM.step==="svc")l.innerHTML=smRows(SM.list,($("#sq")||{}).value)}}).catch(()=>{toast("Could not load services. Please try again.");SM.step="plat";smmDraw()});return}
+if(t.dataset.ss!==undefined){const s=(SM.list||[]).find(x=>String(x.id)===t.dataset.ss);if(s){SM.svc=s;SM.step="form";smmDraw()}}});
+document.addEventListener("input",e=>{if(e.target.id==="sq"&&SM.list){$("#svl").innerHTML=smRows(SM.list,e.target.value)}if(e.target.id==="sn")smmCalc()});
+
 boot();
 </script>
 </body>
