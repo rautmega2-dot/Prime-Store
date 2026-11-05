@@ -180,6 +180,22 @@ html,body,button,input,select,.card,.set,.sel,.item,.chips span,nav button{touch
 .btn:active{transition-duration:.05s}
 .rv{transition:opacity .3s var(--ease) var(--d,0ms),transform .45s var(--ease) var(--d,0ms)}
 nav i{transition:transform .38s cubic-bezier(.3,1.25,.5,1)}
+
+.pg{gap:12px}
+.pt{display:flex;flex-direction:column;gap:12px;padding:16px;cursor:pointer;transition:transform .2s}
+.pt:active{transform:scale(.95)}
+.pt .pi{width:50px;height:50px;border-radius:17px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#6B9BFF,#2D47E8);box-shadow:0 8px 16px -6px var(--glow),inset 0 2px 0 rgba(255,255,255,.35)}
+.pg>.pt:nth-child(4n+2) .pi{background:linear-gradient(135deg,#7BE8FA,#1AB4E8)}
+.pg>.pt:nth-child(4n+3) .pi{background:linear-gradient(135deg,#B7A1FF,#6A47F2)}
+.pg>.pt:nth-child(4n+4) .pi{background:linear-gradient(135deg,#FFD27A,#FF8A1E)}
+.pt .pi svg,.chips span svg{fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.pt .pi svg{width:25px;height:25px}
+.pt .nm{display:block;font-size:16px}
+.pt .cnt{font-size:30px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.pt .cl{color:var(--mut);font-size:12px}
+.pt.on{border-color:var(--pri2)}
+.chips span svg{width:15px;height:15px;vertical-align:-3px;margin-right:6px}
+nav[hidden]{display:none!important}
 </style>
 </head>
 <body>
@@ -212,7 +228,7 @@ home(){const n=S.user.name;return `<div class="top"><div class="logo">${LOGO}</d
 <div class="g2 tiles"><div class="card sq" data-smm="1"><span class="em">🚀</span><div><b>Social Media Services</b><span class="mut">Followers, likes, views and more</span></div></div><div class="card sq alt" data-go="orders"><span class="em">📦</span><div><b>My Orders</b><span class="mut">${S.orders.length} total · track status</span></div></div></div>
 <div class="row"><h3>Available countries</h3><a data-go="buy">View all</a></div>
 <div class="g2">${C.slice(0,4).map(cardC).join("")}</div>`},
-buy(){return `<h2 style="margin:6px 2px 14px">Buy accounts</h2><div class="chips"><span data-k="tg" class="${S.kind==="tg"?"on":""}">Telegram</span><span data-k="wa" class="${S.kind==="wa"?"on":""}">WhatsApp</span></div><input id="q" placeholder="Search country" autocomplete="off"><br><br><div class="g2" id="cg">${C.map(cardC).join("")}</div>`},
+buy(){return `<h2 style="margin:6px 2px 14px">Buy accounts</h2><div class="chips"><span data-k="tg" class="${S.kind==="tg"?"on":""}">${pi("chat")}Telegram</span><span data-k="wa" class="${S.kind==="wa"?"on":""}">${pi("phone")}WhatsApp</span></div><input id="q" placeholder="Search country" autocomplete="off"><br><br><div class="g2" id="cg">${C.map(cardC).join("")}</div>`},
 recharge(){const c=CF(),on=PM.filter(m=>(c[m[4]]||{}).on);
 return `<h2 style="margin:6px 2px 14px">Recharge balance</h2><div class="card"><span class="mut">Current balance</span><div class="big" style="font-size:30px;margin-bottom:0">${f(S.bal)}</div></div>`
 +(c.top&&c.top.maint?'<div class="card mut" style="text-align:center">Recharge is under maintenance. Please try again later.</div>':on.length?on.map(m=>`<div class="card meth" data-pm="${m[0]}"><span class="mi">${m[1]}</span><div><b>${m[2]}</b><span class="mut">${m[3]}</span></div><span style="font-size:26px;color:var(--mut)">›</span></div>`).join(""):'<div class="card mut" style="text-align:center">No payment method is set up yet. Please contact support.</div>')
@@ -270,7 +286,7 @@ const msg=t=>{const m=$("#lmsg");if(m)m.textContent=t};
 async function tgLogin(){const bt=$("#tg");bt.disabled=true;msg("Opening the bot…");const w=window.open("","_blank");try{const d=await api({action:"start"});if(w)w.location.href=d.link;else open(d.link,"_blank");const m=$("#lmsg");if(m){m.textContent="";const a=document.createElement("a");a.href=d.link;a.target="_blank";a.rel="noopener";a.textContent="Tap here if Telegram did not open";a.style.color="var(--pri)";m.append("Tap Start in the bot and you will be logged in here automatically. ",a)}
 clearInterval(poll);const end=Date.now()+3e5;poll=setInterval(async()=>{if(Date.now()>end){clearInterval(poll);bt.disabled=false;return msg("Link expired. Please try again.")}try{const r=await api({action:"poll",tok:d.tok,sec:d.sec});if(r.ok){clearInterval(poll);await boot()}}catch(e){clearInterval(poll);bt.disabled=false;msg(e.message)}},1500)}catch(e){if(w)w.close();bt.disabled=false;msg(e.message)}}
 async function pwLogin(){const id=($("#uid").value||"").replace(/\D/g,""),pw=$("#upw").value;if(!id||!pw)return msg("Enter your ID and password");const g=$("#go");g.disabled=true;g.textContent="Logging in…";try{await api({action:"password",id,password:pw});await boot()}catch(e){g.disabled=false;g.textContent="Log in";msg(e.message)}}
-async function boot(){try{const r=await fetch("/api/data");const d=await r.json();S.bot=d.bot||S.bot;if(r.ok){S.user=d.user;S.bal=d.balance;S.tg=d.tg;S.wa=d.wa;C=S.kind==="wa"?S.wa:S.tg;S.orders=d.orders;S.tops=d.topups;S.plats=d.plats||[];S.cfg=d.cfg||{};if(S.cfg.fx>0)RATE=S.cfg.fx;if(d.user&&(d.user.cur==="INR"||d.user.cur==="USDT")){S.cur=d.user.cur;ST.set("ps_cur",S.cur)}}else if(r.status===401){S.user=null}else throw 0}catch(e){toast("Could not load data. Please refresh.")}S.ready=true;render();if(S.user)joinCheck()}
+async function boot(){try{const r=await fetch("/api/data");const d=await r.json();S.bot=d.bot||S.bot;if(r.ok){S.user=d.user;S.bal=d.balance;S.tg=d.tg;S.wa=d.wa;C=S.kind==="wa"?S.wa:S.tg;S.orders=d.orders;S.tops=d.topups;S.plats=d.plats||[];S.cfg=d.cfg||{};if(S.cfg.fx>0)RATE=S.cfg.fx;if(d.user&&(d.user.cur==="INR"||d.user.cur==="USDT")){S.cur=d.user.cur;ST.set("ps_cur",S.cur)}}else if(r.status===401){S.user=null}else throw 0}catch(e){toast("Could not load data. Please refresh.")}S.ready=true;render();if(S.user){joinCheck();initBack()}}
 /* ---------- Social media services: full pages (form with Platform / Service selectors), order details ---------- */
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const SM={plat:null,plabel:"",cat:null,svc:null,list:null,cache:{},pick:null,q:"",link:"",qty:"",res:null,busy:false,err:"",loading:false};
@@ -287,13 +303,17 @@ async function reload(){try{const r=await fetch("/api/data");if(!r.ok)return;con
 async function jobWait(id){const end=Date.now()+105e3;let n=0;while(Date.now()<end){await new Promise(r=>setTimeout(r,n++?1200:500));try{const r=await act({action:"job",id});if(["done","error","checking","expired"].includes(r.status)){needJoin(r);return r}}catch(e){}}return{status:"checking",error:"We could not confirm it yet. Please check your Orders before trying again."}}
 const topBar=(t,back)=>`<div class="top"><button class="ic" data-pb="${back}" aria-label="Back">←</button><b>${t}</b></div>`;
 
-function smmOpen(){Object.assign(SM,{plat:null,plabel:"",cat:null,svc:null,list:null,cache:{},pick:null,q:"",link:"",qty:"",res:null,busy:false,err:"",loading:false});S.sub="smm";render();scrollTo({top:0})}
+function smmOpen(){Object.assign(SM,{plat:null,plabel:"",cat:null,svc:null,list:null,cache:{},pick:"plat",q:"",link:"",qty:"",res:null,busy:false,err:"",loading:false});S.sub="smm";render();scrollTo({top:0})}
 function pickRows(){const k=SM.pick,q=(SM.q||"").toLowerCase().trim();
 if(k==="plat"){const P=S.plats||[];return P.length?P.map(p=>`<div class="sel ${SM.plat===p[0]?"on":""}" data-sp="${esc(p[0])}"><div><b>${esc(p[1])}</b><small>${p[2]} services</small></div><span class="ch">›</span></div>`).join(""):none("No services are available right now. Please check back soon.")}
 const L=inCat().filter(s=>!q||s.n.toLowerCase().includes(q)||String(s.id)===q);
 return L.length?L.slice(0,100).map(s=>`<div class="sel ${SM.svc&&SM.svc.id===s.id?"on":""}" data-ss="${s.id}"><div><b>${esc(s.n)}</b><small>${f(s.r)} per 1,000 · Min ${s.lo} · Max ${s.hi}</small></div><span class="ch">›</span></div>`).join("")+(L.length>100?none("Showing 100 of "+L.length+". Search to narrow it down."):""):none("No service found.")}
-function pickView(){const t={plat:"Choose platform",svc:"Choose service"}[SM.pick];
-return topBar(t,"pick")+(SM.pick==="plat"?"":`<input id="psq" placeholder="Search" autocomplete="off" value="${esc(SM.q)}" style="margin-bottom:12px">`)+`<div class="card" style="padding:4px 16px" id="pl">${pickRows()}</div>`}
+const PIC={chat:'<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>',phone:'<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/>',camera:'<path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/>',play:'<circle cx="12" cy="12" r="9"/><path d="M10 8.5l6 3.5-6 3.5z"/>',users:'<circle cx="9" cy="8" r="3.2"/><path d="M3 20a6 6 0 0 1 12 0M16 5a3.2 3.2 0 0 1 0 6M18 14a6 6 0 0 1 3 6"/>',at:'<circle cx="12" cy="12" r="3.5"/><path d="M15.5 12v1.5a2.5 2.5 0 0 0 5 0V12a8.5 8.5 0 1 0-3.3 6.7"/>',music:'<path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/>',globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>'};
+const pi=k=>'<svg viewBox="0 0 24 24">'+(PIC[k]||PIC.globe)+'</svg>';
+const pk=p=>{const t=(String(p[0])+" "+String(p[1])).toLowerCase();return/tele|chat|messag|discord|signal|viber/.test(t)?"chat":/whats|phone|sms|voice|call/.test(t)?"phone":/insta|photo|pinterest|snap/.test(t)?"camera":/you|video|tube|tiktok|reel|twitch|vimeo/.test(t)?"play":/face|fb|social|follow|like|member|group/.test(t)?"users":/twit|tweet|threads|\bx\b/.test(t)?"at":/spot|music|sound|audio/.test(t)?"music":"globe"};
+function platGrid(){const P=S.plats||[];return P.length?`<div class="g2 pg">${P.map(p=>`<div class="card pt ${SM.plat===p[0]?"on":""}" data-sp="${esc(p[0])}"><span class="pi">${pi(pk(p))}</span><b class="nm">${esc(p[1])}</b><div><span class="cnt">${p[2]}</span><span class="cl"> services</span></div></div>`).join("")}</div>`:none("No services are available right now. Please check back soon.")}
+function pickView(){if(SM.pick==="plat")return topBar("Select service",SM.svc?"pick":"exit")+platGrid();
+return topBar(SM.plabel||"Choose service","toplat")+`<input id="psq" placeholder="Search" autocomplete="off" value="${esc(SM.q)}" style="margin-bottom:12px"><div class="card" style="padding:4px 16px" id="pl">${pickRows()}</div>`}
 function formView(){const s=SM.svc,q=smQ();
 return topBar("Social media services","exit")+`<div class="card" style="padding:4px 16px">
 <div class="sel" data-pick="plat"><div><small>Platform</small><b>${SM.plat?esc(SM.plabel):"Select platform"}</b></div><span class="ch">›</span></div>
@@ -308,7 +328,7 @@ return topBar(ok?"Order placed":"Order is being checked","exit")+`<div style="te
 V.smm=()=>SM.res?resView():SM.pick?pickView():formView();
 
 async function pickPlat(k){const p=(S.plats||[]).find(x=>x[0]===k);Object.assign(SM,{plat:k,plabel:p?p[1]:k,cat:null,svc:null,pick:null,q:"",err:"",list:SM.cache[k]||null});
-if(!SM.list){SM.loading=true;render();try{const r=await fetch("/api/data?plat="+encodeURIComponent(k));if(!r.ok)throw 0;const d=await r.json();SM.cache[k]=d.services||[];if(SM.plat!==k)return;SM.list=SM.cache[k]}catch(e){Object.assign(SM,{plat:null,plabel:"",loading:false});toast("Could not load services. Please try again.");return render()}SM.loading=false}
+if(!SM.list){SM.loading=true;render();try{const r=await fetch("/api/data?plat="+encodeURIComponent(k));if(!r.ok)throw 0;const d=await r.json();SM.cache[k]=d.services||[];if(SM.plat!==k)return;SM.list=SM.cache[k]}catch(e){Object.assign(SM,{plat:null,plabel:"",loading:false,pick:"plat"});toast("Could not load services. Please try again.");return render()}SM.loading=false}
 SM.pick="svc";render();scrollTo({top:0})}
 function smmCalc(){const s=SM.svc;if(S.sub!=="smm"||SM.pick||SM.res||!s||!$("#stot"))return;const q=smQ(),ok=q>=s.lo&&q<=s.hi,c=ok?smCost(s,q)/100:0,g=$("#sgo"),e=$("#serr");
 $("#stot").textContent=f(c);if(ok&&c>S.bal){e.textContent="You need "+f(c-S.bal)+" more.";g.textContent="Add funds";g.dataset.fund="1"}else{if(e.textContent.startsWith("You need"))e.textContent="";g.textContent=SM.busy?"Placing order…":"Place order";delete g.dataset.fund}}
@@ -347,7 +367,7 @@ if(t.dataset.ord!==undefined){const[k,i]=t.dataset.ord.split(":");return openOrd
 if(t.id==="odr")return odAction("refresh");if(t.id==="odl")return odAction("refill");
 if(t.id==="sgo"){if(t.dataset.fund){S.sub=null;return go("recharge")}return smmPlace()}
 if(t.dataset.pick!==undefined){SM.pick=t.dataset.pick;SM.q="";render();return scrollTo({top:0})}
-if(t.dataset.pb!==undefined){const v=t.dataset.pb;if(v==="pick"){SM.pick=null;return render()}if(v==="again")return smmOpen();
+if(t.dataset.pb!==undefined){const v=t.dataset.pb;if(v==="pick"){SM.pick=null;return render()}if(v==="toplat"){SM.pick="plat";SM.q="";render();return scrollTo({top:0})}if(v==="again")return smmOpen();
 if(v==="paydone"){clearInterval(PY.t);S.sub=null;S.tab="recharge";render();return scrollTo({top:0})}
 if(v==="payback"){if(PY.step==="pay"&&PY.m!=="bpay"&&!PY.res){clearInterval(PY.t);PY.step="amt";PY.err="";PY.inv=null;return render()}clearInterval(PY.t);S.sub=null;S.tab="recharge";render();return scrollTo({top:0})}if(v==="orders"){S.sub=null;S.tab="orders";render();return scrollTo({top:0})}S.sub=null;render();return scrollTo({top:0})}
 if(t.dataset.sp!==undefined)return pickPlat(t.dataset.sp);
@@ -449,6 +469,14 @@ document.addEventListener("pointerdown",e=>{const t=e.target.closest(sel);if(!t|
 document.addEventListener("pointermove",e=>{if(el)set(el,e.clientX,e.clientY)});
 const up=()=>{if(!el)return;const t=el;el=null;t.style.transition="transform .6s cubic-bezier(.34,1.56,.64,1)";t.style.transform=""};
 ["pointerup","pointercancel"].forEach(n=>document.addEventListener(n,up))})();
+let bk=0,exitArm=0;
+function trap(){try{history.pushState({ps:1},"")}catch(e){}}
+function appBack(){const ov=document.querySelector(".ov");if(ov){ov.remove();return true}
+if(!S.user)return false;
+if(S.sub){const b=document.querySelector("#app .top .ic[data-pb]");if(b)b.click();return true}
+if(S.tab!=="home"){go("home");return true}
+return false}
+function initBack(){if(bk)return;bk=1;trap();addEventListener("popstate",()=>{if(appBack()){trap();return}if(exitArm){exitArm=0;history.back();return}exitArm=1;toast("Press back again to exit");setTimeout(()=>{exitArm=0},2200);trap()})}
 boot();
 </script>
 </body>
