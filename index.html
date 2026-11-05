@@ -200,6 +200,8 @@ svg.brand{fill:none!important;stroke:none!important;display:inline-block;flex:no
 .pt .pi.bl svg.brand{width:50px;height:50px;margin:0;filter:drop-shadow(0 6px 8px var(--glow))}
 .sel svg.brand{width:22px;height:22px;vertical-align:-5px;margin-right:9px}
 .item .fl svg.brand{width:34px;height:34px;margin:0;vertical-align:middle}
+.view.seen .lg .logo{animation:float 4s ease-in-out infinite}
+.view.seen>div[style*="font-size:52px"],.view.seen>div[style*="font-size:56px"]{animation:none}
 .smE{display:inline-block;font-style:normal;line-height:1;margin-right:5px}
 .chips .smE,.kd .smE{font-size:1.2em}
 .item .fl .smE{margin:0}
@@ -304,13 +306,15 @@ settings(){return `<h2 style="margin:6px 2px 14px">Settings</h2><div class="card
 <div class="set" data-help="hsell"><span>💼</span><div><b>How to sell</b><small>Got accounts or stock to sell?</small></div></div>
 <div class="set" data-s="out"><span>🚪</span><div><b>Log out</b><small>Sign out from this device</small></div></div></div>`},
 login(){return `<div class="lg"><div class="logo">${LOGO}</div><h1>Prime Store</h1><div class="mut" style="text-align:center">Telegram account store</div><div class="card" style="margin-top:20px"><div class="tabs"><span class="on">Telegram</span><span>Email</span><span>Phone</span></div><button class="btn" id="tg">${brand("tg")}Continue with Telegram</button><div class="mut" id="lmsg" style="text-align:center;margin:12px 0">The bot will send you your ID and password.</div><div class="mut" style="text-align:center">or log in with your ID and password</div><input id="uid" inputmode="numeric" placeholder="Telegram user ID" style="margin:10px 0"><input id="upw" type="password" placeholder="Password" autocomplete="current-password" style="margin-bottom:10px"><button class="btn ghost" id="go">Log in</button></div></div>`}};
-let RO;
-function stagger(){if(RO)RO.disconnect();if(!("IntersectionObserver" in window))return;
+let RO;const SEEN=new Set();let FIRST=true;
+function vkey(){try{if(!S.user)return"login";if(S.sub){const x=S.sub==="pay"?PY.m+"|"+PY.step+"|"+(PY.res?1:0):S.sub==="buytg"?TB.k+"|"+(TB.res?1:0):S.sub==="help"?HP:"";return"s:"+S.sub+":"+x}return"t:"+S.tab}catch(e){return"x"}}
+function stagger(){if(RO)RO.disconnect();const k=vkey();FIRST=!SEEN.has(k);SEEN.add(k);if(!FIRST){const w=document.querySelector("#app .view");if(w)w.classList.add("seen");return}
+if(!("IntersectionObserver" in window))return;
 const els=[...document.querySelectorAll("#app .view>*:not(.g2):not(.lg):not(br), #app .g2>*, #app .lg>*:not(.logo), #app .item, #app .sel, #app .set, #app .kv")];
 els.forEach(e=>e.classList.add("rv"));
 RO=new IntersectionObserver(es=>{let n=0;es.forEach(en=>{if(!en.isIntersecting)return;const e=en.target;RO.unobserve(e);const d=Math.min(n++,5)*40;e.style.setProperty("--d",d+"ms");requestAnimationFrame(()=>e.classList.add("in"));setTimeout(()=>e.classList.remove("rv","in"),800+d)})},{threshold:.06,rootMargin:"0px 0px -3% 0px"});
 els.forEach(e=>RO.observe(e))}
-function countUp(){const e=$("#bal");if(!e)return;const t=S.bal,t0=performance.now();(function s(n){const p=Math.min((n-t0)/900,1),v=t*(1-Math.pow(1-p,3));e.textContent=f(v);if(p<1)requestAnimationFrame(s)})(t0)}
+function countUp(){const e=$("#bal");if(!e||!FIRST)return;const t=S.bal,t0=performance.now();(function s(n){const p=Math.min((n-t0)/900,1),v=t*(1-Math.pow(1-p,3));e.textContent=f(v);if(p<1)requestAnimationFrame(s)})(t0)}
 function render(){const a=$("#app"),n=$("#nav");theme();
 if(!S.user){n.hidden=true;a.innerHTML=`<div class="view">${V.login()}</div>`;stagger();return}
 if(S.sub){n.hidden=true;a.innerHTML=`<div class="view">${V[S.sub]()}</div>`;stagger();if(S.sub==="smm")smmCalc();if(S.sub==="pay")payInit();return}
