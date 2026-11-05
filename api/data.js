@@ -10,8 +10,14 @@ module.exports = async (req, res) => {
   if (!u) return res.status(401).json({ bot });
   try {
     const db = await L.db();
+    // the services of one platform (loaded when the user opens it): /api/data?plat=instagram
+    const pk = req.query && req.query.plat;
+    if (pk) {
+      const d = await db.collection("web_smm").findOne({ _id: String(pk) });
+      return res.json({ services: (d && d.services) || [] });
+    }
     const mine = { user_id: u.id };
-    const [w, tg, wa, smm, num, wao, tops] = await Promise.all([
+    const [w, tg, wa, smm, num, wao, tops, plats] = await Promise.all([
       db.collection("wallet").findOne({ _id: u.id }),
       db.collection("lion_countries").find({ enabled: 1, my_price: { $ne: null } }).sort({ my_price: 1 }).toArray(),
       db.collection("wa_countries").find({ enabled: 1, my_price: { $ne: null } }).sort({ my_price: 1 }).toArray(),
@@ -19,6 +25,7 @@ module.exports = async (req, res) => {
       db.collection("number_orders").find(mine).sort({ _id: -1 }).limit(30).toArray(),
       db.collection("wa_orders").find(mine).sort({ _id: -1 }).limit(30).toArray(),
       db.collection("topups").find(mine).sort({ _id: -1 }).limit(30).toArray(),
+      db.collection("web_smm").find({}, { projection: { services: 0 } }).sort({ o: 1 }).toArray(),
     ]);
     const c = (x) => [x.name, x.code, x.num || "", x.my_price, x.qty || 0];
     const o = (r, id, fl, n) => ({ id, n, fl, p: (r.cost || 0) / 100, s: r.status || "", t: ts(r.created) });
@@ -34,6 +41,7 @@ module.exports = async (req, res) => {
       tg: tg.map(c),
       wa: wa.map(c),
       orders,
+      plats: plats.map((p) => [p._id, p.label, p.n]),
       topups: tops.map((t) => ({ a: (t.amount || 0) / 100, s: "Added", t: ts(t.created) })),
     });
   } catch (e) {
