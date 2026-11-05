@@ -196,6 +196,18 @@ nav i{transition:transform .38s cubic-bezier(.3,1.25,.5,1)}
 .pt.on{border-color:var(--pri2)}
 .chips span svg{width:15px;height:15px;vertical-align:-3px;margin-right:6px}
 nav[hidden]{display:none!important}
+
+.stk{display:flex;align-items:center;gap:12px;margin:14px 2px;cursor:pointer;font-weight:600;-webkit-user-select:none;user-select:none}
+.stk:active .sw::after{width:28px}
+.ofl span{white-space:nowrap}
+.ofl span i{font-style:normal;font-size:11px;opacity:.7;margin-left:2px}
+.ofl span.on i{opacity:1}
+.item .kd{margin-top:5px;font-size:10.5px;padding:2px 9px}
+.kd.tg{background:rgba(45,71,232,.14);color:var(--pri)}
+.kd.wa{background:rgba(20,160,119,.15);color:var(--ok)}
+.kd.smm{background:rgba(154,123,255,.2);color:#6a47f2}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .kd.smm{color:#c4b2ff}}
+:root[data-theme="dark"] .kd.smm{color:#c4b2ff}
 </style>
 </head>
 <body>
@@ -206,7 +218,7 @@ nav[hidden]{display:none!important}
 <script>
 let RATE=90;const $=s=>document.querySelector(s);
 const ST={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
-const S={user:null,tab:"home",cur:ST.get("ps_cur","INR"),dark:ST.get("ps_dark",null),bal:0,orders:[],tops:[],tg:[],wa:[],kind:"tg",meth:"UPI",amt:100,bot:"",ready:false};
+const S={user:null,tab:"home",cur:ST.get("ps_cur","INR"),dark:ST.get("ps_dark",null),bal:0,stock:ST.get("ps_stock",false),of:"all",orders:[],tops:[],tg:[],wa:[],kind:"tg",meth:"UPI",amt:100,bot:"",ready:false};
 let C=[];
 const flag=c=>/^[A-Za-z]{2}$/.test(c||"")?String.fromCodePoint(...[...c.toUpperCase()].map(x=>127397+x.charCodeAt(0))):"🌍";
 const botUrl=()=>"https://t.me/"+S.bot;
@@ -219,6 +231,9 @@ function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("show");cl
 function theme(){const r=document.documentElement;S.dark===null?r.removeAttribute("data-theme"):r.setAttribute("data-theme",S.dark?"dark":"light")}
 const isDark=()=>S.dark===null?matchMedia("(prefers-color-scheme: dark)").matches:S.dark;
 const cardC=c=>{const[n0,k,d,p,s,iso]=c;const n=n0===n0.toLowerCase()?n0.replace(/\b\w/g,x=>x.toUpperCase()):n0;return `<div class="card cn"><div class="fl">${flag(iso||k)}</div><div class="nm">${n}</div><div class="mut">${k} · ${d}</div>`+(s?`<div class="pr">${f(p)}</div><div class="mut ok">${s} in stock</div><button class="btn sm" data-buy="${k}">Buy now</button>`:`<div class="pr bad">Unavailable</div><div class="mut">Out of stock</div><button class="btn sm" disabled>Buy now</button>`)+`</div>`};
+const buyRows=()=>{const e=document.querySelector("#q"),q=(e?e.value:"").toLowerCase().trim(),L=C.filter(c=>(!q||c[0].toLowerCase().includes(q)||c[1].toLowerCase()===q)&&(!S.stock||c[4]));return L.length?L.map(cardC).join(""):'<div class="mut" style="grid-column:1/-1;text-align:center;padding:18px 0">'+(S.stock&&!q?"No country in stock right now.":"No country found. Try another name.")+'</div>'};
+const okind=o=>o.k==="smm"?"smm":o.k==="wa"?"wa":"tg";
+const KLAB={tg:"Telegram",wa:"WhatsApp",smm:"Social media"};
 const V={
 home(){const n=S.user.name;return `<div class="top"><div class="logo">${LOGO}</div><b>Prime Store</b><span class="sp"></span><button class="ic" data-go="settings" aria-label="Settings">⚙</button></div>
 <div class="hi"><span class="mut">Welcome back,</span><h1>${n}</h1></div><br>
@@ -228,12 +243,13 @@ home(){const n=S.user.name;return `<div class="top"><div class="logo">${LOGO}</d
 <div class="g2 tiles"><div class="card sq" data-smm="1"><span class="em">🚀</span><div><b>Social Media Services</b><span class="mut">Followers, likes, views and more</span></div></div><div class="card sq alt" data-go="orders"><span class="em">📦</span><div><b>My Orders</b><span class="mut">${S.orders.length} total · track status</span></div></div></div>
 <div class="row"><h3>Available countries</h3><a data-go="buy">View all</a></div>
 <div class="g2">${C.slice(0,4).map(cardC).join("")}</div>`},
-buy(){return `<h2 style="margin:6px 2px 14px">Buy accounts</h2><div class="chips"><span data-k="tg" class="${S.kind==="tg"?"on":""}">${pi("chat")}Telegram</span><span data-k="wa" class="${S.kind==="wa"?"on":""}">${pi("phone")}WhatsApp</span></div><input id="q" placeholder="Search country" autocomplete="off"><br><br><div class="g2" id="cg">${C.map(cardC).join("")}</div>`},
+buy(){return `<h2 style="margin:6px 2px 14px">Buy accounts</h2><div class="chips"><span data-k="tg" class="${S.kind==="tg"?"on":""}">${pi("chat")}Telegram</span><span data-k="wa" class="${S.kind==="wa"?"on":""}">${pi("phone")}WhatsApp</span></div><input id="q" placeholder="Search country" autocomplete="off"><div class="stk" data-stk="1"><span class="sw ${S.stock?"on":""}"></span><span>In stock only</span><span class="mut" style="margin-left:auto">${C.filter(c=>c[4]).length} live</span></div><div class="g2" id="cg">${buyRows()}</div>`},
 recharge(){const c=CF(),on=PM.filter(m=>(c[m[4]]||{}).on);
 return `<h2 style="margin:6px 2px 14px">Recharge balance</h2><div class="card"><span class="mut">Current balance</span><div class="big" style="font-size:30px;margin-bottom:0">${f(S.bal)}</div></div>`
 +(c.top&&c.top.maint?'<div class="card mut" style="text-align:center">Recharge is under maintenance. Please try again later.</div>':on.length?on.map(m=>`<div class="card meth" data-pm="${m[0]}"><span class="mi">${m[1]}</span><div><b>${m[2]}</b><span class="mut">${m[3]}</span></div><span style="font-size:26px;color:var(--mut)">›</span></div>`).join(""):'<div class="card mut" style="text-align:center">No payment method is set up yet. Please contact support.</div>')
 +`<div class="row"><h3>Recharge history</h3><a id="rf">Refresh</a></div><div class="card" id="hist"><div class="sk"></div><div class="sk" style="width:70%"></div><div class="sk" style="width:85%"></div></div>`},
-orders(){return `<h2 style="margin:6px 2px 14px">Orders</h2><div class="card">`+(S.orders.length?S.orders.map(o=>`<div class="item ord" data-ord="${o.k}:${o.i}"><span class="fl" style="font-size:28px">${o.fl}</span><div><b>${esc(o.n)}</b><small>${esc(o.id)} · ${new Date(o.t).toLocaleString()}</small></div><div style="text-align:right;flex:none"><b>${f(o.p)}</b><small class="${o.s==="Completed"?"ok":""}">${esc(o.s)}</small></div><span class="ch">›</span></div>`).join(""):`<div class="mut" style="text-align:center;padding:18px 0">No orders yet. Pick a country in Buy to place your first order.</div><button class="btn" data-go="buy">Go to Buy</button>`)+`</div>`},
+orders(){const A=S.orders,cn=k=>A.filter(o=>okind(o)===k).length,L=S.of==="all"?A:A.filter(o=>okind(o)===S.of);
+return `<h2 style="margin:6px 2px 14px">Orders</h2>`+(A.length?`<div class="chips ofl">${[["all","All",A.length],["tg","Telegram",cn("tg")],["wa","WhatsApp",cn("wa")],["smm","Social",cn("smm")]].map(x=>`<span data-of="${x[0]}" class="${S.of===x[0]?"on":""}">${x[1]} <i>${x[2]}</i></span>`).join("")}</div>`:"")+`<div class="card">`+(L.length?L.map(o=>`<div class="item ord" data-ord="${o.k}:${o.i}"><span class="fl" style="font-size:28px">${o.fl}</span><div><b>${esc(o.n)}</b><small>${esc(o.id)} · ${new Date(o.t).toLocaleString()}</small><span class="tag kd ${okind(o)}">${KLAB[okind(o)]}</span></div><div style="text-align:right;flex:none"><b>${f(o.p)}</b><small class="${o.s==="Completed"?"ok":""}">${esc(o.s)}</small></div><span class="ch">›</span></div>`).join(""):A.length?`<div class="mut" style="text-align:center;padding:18px 0">No ${KLAB[S.of]} orders yet.</div>`:`<div class="mut" style="text-align:center;padding:18px 0">No orders yet. Pick a country in Buy to place your first order.</div><button class="btn" data-go="buy">Go to Buy</button>`)+`</div>`},
 settings(){return `<h2 style="margin:6px 2px 14px">Settings</h2><div class="card">
 <div class="set" data-s="bot"><span>🤖</span><div><b>Bot connect</b><small>Telegram ID ${S.user.id} · same wallet as the bot</small></div><span class="tag ok">Live</span></div>
 <div class="set"><span>💱</span><div><b>Currency</b><small>Choose display currency</small></div><select id="cur"><option value="INR" ${S.cur==="INR"?"selected":""}>₹ INR</option><option value="USDT" ${S.cur==="USDT"?"selected":""}>$ USDT</option></select></div>
@@ -277,7 +293,7 @@ const s=t.dataset.s;if(s==="dark"){S.dark=!isDark();ST.set("ps_dark",S.dark);the
 else if(s==="out"){fetch("/api/auth",{method:"DELETE"}).finally(()=>{S.user=null;render()})}
 else if(s==="bot")open(botUrl(),"_blank");
 else if(s)toast("Link will be added soon")});
-document.addEventListener("input",e=>{if(e.target.id==="q"){const q=e.target.value.toLowerCase();const r=C.filter(c=>c[0].toLowerCase().includes(q)||c[1].toLowerCase()===q);$("#cg").innerHTML=r.length?r.map(cardC).join(""):'<div class="mut" style="grid-column:1/-1;text-align:center">No country found. Try another name.</div>'}
+document.addEventListener("input",e=>{if(e.target.id==="q")$("#cg").innerHTML=buyRows();
 if(e.target.id==="amt"){S.amt=+e.target.value||0;$("#pa").textContent=S.amt}});
 document.addEventListener("change",e=>{if(e.target.id==="cur"){S.cur=e.target.value;ST.set("ps_cur",S.cur);toast("Currency changed to "+S.cur);render();act({action:"set_cur",cur:S.cur}).catch(()=>{})}});
 let poll;
@@ -469,6 +485,9 @@ document.addEventListener("pointerdown",e=>{const t=e.target.closest(sel);if(!t|
 document.addEventListener("pointermove",e=>{if(el)set(el,e.clientX,e.clientY)});
 const up=()=>{if(!el)return;const t=el;el=null;t.style.transition="transform .6s cubic-bezier(.34,1.56,.64,1)";t.style.transform=""};
 ["pointerup","pointercancel"].forEach(n=>document.addEventListener(n,up))})();
+document.addEventListener("click",e=>{const t=e.target.closest("[data-stk],[data-of]");if(!t)return;
+if(t.dataset.stk){S.stock=!S.stock;ST.set("ps_stock",S.stock);t.querySelector(".sw").classList.toggle("on",S.stock);const g=$("#cg");if(g)g.innerHTML=buyRows();return}
+if(t.dataset.of){S.of=t.dataset.of;render()}});
 let bk=0,exitArm=0;
 function trap(){try{history.pushState({ps:1},"")}catch(e){}}
 function appBack(){const ov=document.querySelector(".ov");if(ov){ov.remove();return true}
