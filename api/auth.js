@@ -66,7 +66,6 @@ async function newCode(db, extra) {
 // POST {action:"password", id, password}         -> login with the Telegram ID and password the bot gave
 // POST {action:"register", kind, ident, password}-> new account with email or phone (kind: "email" | "phone")
 // POST {action:"login", ident, password}         -> login with email or phone + password
-// POST {action:"add_ident", kind, ident, password} -> (logged in) add the email or phone this account does not have yet; also sets the website password
 // POST {action:"link_start"}                     -> (logged in, no Telegram yet) code + bot link to connect Telegram and merge
 // DELETE                                         -> logout
 module.exports = async (req, res) => {
@@ -132,26 +131,6 @@ module.exports = async (req, res) => {
       const w = await users.findOne({ [kind]: val });
       if (await rejectPw(res, users, w, pw, "Wrong email, number or password")) return;
       return finish(res, db, w._id);
-    }
-
-    if (b.action === "add_ident") {
-      const u = L.readSession(req);
-      if (!u) return res.status(401).json({ error: "Please log in again." });
-      const kind = b.kind === "phone" ? "phone" : "email";
-      const val = kind === "email" ? normEmail(b.ident) : normPhone(b.ident);
-      if (!val) return res.status(400).json({ error: kind === "email" ? "Enter a valid email" : "Enter a valid phone number" });
-      if (!goodPw(b.password)) return res.status(400).json({ error: "Password must be 6 to 100 characters" });
-      const me = await users.findOne({ _id: u.id }, { projection: { email: 1, phone: 1 } });
-      if (!me) return res.status(404).json({ error: "Account not found. Please log in again." });
-      if (me[kind]) return res.status(400).json({ error: `You already have ${kind === "email" ? "an email" : "a number"} on this account.` });
-      const salt = rnd(16);
-      try {
-        await users.updateOne({ _id: u.id }, { $set: { [kind]: val, salt, hash: hash(b.password, salt), fails: 0, lock: 0 } });
-      } catch (e) {
-        if (e && e.code === 11000) return res.status(409).json({ error: "This " + (kind === "email" ? "email" : "number") + " is already used by another account." });
-        throw e;
-      }
-      return res.json({ ok: true });
     }
 
     if (b.action === "password") {
