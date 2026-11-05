@@ -70,7 +70,7 @@ module.exports = async (req, res) => {
       });
     }
     const mine = { user_id: u.id };
-    const [w, tg, wa, smm, num, wao, tops, plats, cfg, flg, ur] = await Promise.all([
+    const [w, tg, wa, smm, num, wao, tops, plats, cfg, flg, ur, wu] = await Promise.all([
       db.collection("wallet").findOne({ _id: u.id }),
       db.collection("lion_countries").find({ enabled: 1, my_price: { $ne: null } }).sort({ my_price: 1 }).toArray(),
       db.collection("wa_countries").find({ enabled: 1, my_price: { $ne: null } }).sort({ my_price: 1 }).toArray(),
@@ -82,6 +82,7 @@ module.exports = async (req, res) => {
       db.collection("web_cfg").findOne({ _id: "cfg" }),
       db.collection("web_cfg").findOne({ _id: "flags" }),
       db.collection("users").findOne({ _id: u.id }),
+      db.collection("web_users").findOne({ _id: u.id }, { projection: { email: 1, phone: 1 } }),
     ]);
     const c = (kind) => (x) => [x.name, x.code, x.num || "", x.my_price, x.qty || 0, ((flg && flg[kind]) || {})[x.code] || ""];
     const o = (r, id, fl, n, k) => ({ id, n, fl, k, i: r._id, p: (r.cost || 0) / 100, s: r.status || "", t: ts(r.created) });
@@ -92,7 +93,7 @@ module.exports = async (req, res) => {
     ].sort((a, b) => b.t - a.t).slice(0, 40);
     res.json({
       bot,
-      user: { id: u.id, name: L.esc(u.name), cur: (ur && ur.cur) || "", tos: !!(ur && ur.tos) },
+      user: { id: u.id, name: L.esc(u.name), cur: (ur && ur.cur) || "", tos: !!(ur && ur.tos), tg: !L.isWeb(u.id), email: (wu && wu.email) || "", phone: (wu && wu.phone) || "" },
       balance: ((w && w.balance) || 0) / 100,
       tg: tg.map(c("tg")),
       wa: wa.map(c("wa")),

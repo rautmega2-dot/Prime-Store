@@ -10,6 +10,10 @@ exports.db = async () => {
   return client.db(process.env.MONGO_DB || "primebot");
 };
 
+// Website-only accounts (email / phone) get an internal id in this range. Real Telegram ids are far below it.
+exports.WEB_BASE = 9e12;
+exports.isWeb = (id) => Number(id) >= 9e12;
+
 const sign = (p) => crypto.createHmac("sha256", process.env.SESSION_SECRET).update(p).digest("base64url");
 
 exports.makeSession = (u) => {
