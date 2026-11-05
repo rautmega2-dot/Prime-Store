@@ -306,9 +306,10 @@ settings(){return `<h2 style="margin:6px 2px 14px">Settings</h2><div class="card
 <div class="set" data-help="hsell"><span>💼</span><div><b>How to sell</b><small>Got accounts or stock to sell?</small></div></div>
 <div class="set" data-s="out"><span>🚪</span><div><b>Log out</b><small>Sign out from this device</small></div></div></div>`},
 login(){return `<div class="lg"><div class="logo">${LOGO}</div><h1>Prime Store</h1><div class="mut" style="text-align:center">Telegram account store</div><div class="card" style="margin-top:20px"><div class="tabs"><span class="on">Telegram</span><span>Email</span><span>Phone</span></div><button class="btn" id="tg">${brand("tg")}Continue with Telegram</button><div class="mut" id="lmsg" style="text-align:center;margin:12px 0">The bot will send you your ID and password.</div><div class="mut" style="text-align:center">or log in with your ID and password</div><input id="uid" inputmode="numeric" placeholder="Telegram user ID" style="margin:10px 0"><input id="upw" type="password" placeholder="Password" autocomplete="current-password" style="margin-bottom:10px"><button class="btn ghost" id="go">Log in</button></div></div>`}};
-let RO;const SEEN=new Set();let FIRST=true;
-function vkey(){try{if(!S.user)return"login";if(S.sub){const x=S.sub==="pay"?PY.m+"|"+PY.step+"|"+(PY.res?1:0):S.sub==="buytg"?TB.k+"|"+(TB.res?1:0):S.sub==="help"?HP:"";return"s:"+S.sub+":"+x}return"t:"+S.tab}catch(e){return"x"}}
-function stagger(){if(RO)RO.disconnect();const k=vkey();FIRST=!SEEN.has(k);SEEN.add(k);if(!FIRST){const w=document.querySelector("#app .view");if(w)w.classList.add("seen");return}
+let RO,LASTKEY=null,FIRST=true;
+/* One id per "page". The reveal plays once when you navigate INTO a page; re-renders of that same page (refresh, Get code, polling, filters) never replay it. */
+function vkey(){try{if(!S.user)return"login";if(!S.sub)return"t:"+S.tab;const x=S.sub==="pay"?PY.m+"|"+PY.step+"|"+(PY.res?1:0):S.sub==="buytg"?TB.k+"|"+(TB.res?1:0):S.sub==="help"?HP:"";return"s:"+S.sub+":"+x}catch(e){return"x"}}
+function stagger(){if(RO)RO.disconnect();const k=vkey();FIRST=k!==LASTKEY;LASTKEY=k;if(!FIRST){const w=document.querySelector("#app .view");if(w)w.classList.add("seen");return}
 if(!("IntersectionObserver" in window))return;
 const els=[...document.querySelectorAll("#app .view>*:not(.g2):not(.lg):not(br), #app .g2>*, #app .lg>*:not(.logo), #app .item, #app .sel, #app .set, #app .kv")];
 els.forEach(e=>e.classList.add("rv"));
