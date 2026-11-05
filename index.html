@@ -200,6 +200,8 @@ svg.brand{fill:none!important;stroke:none!important;display:inline-block;flex:no
 .pt .pi.bl svg.brand{width:50px;height:50px;margin:0;filter:drop-shadow(0 6px 8px var(--glow))}
 .sel svg.brand{width:22px;height:22px;vertical-align:-5px;margin-right:9px}
 .item .fl svg.brand{width:34px;height:34px;margin:0;vertical-align:middle}
+.swi{animation:swin .45s var(--spring) both;animation-delay:var(--d,0ms)}
+@keyframes swin{from{opacity:0;transform:translate3d(0,18px,0) scale(.96)}}
 .view.seen .lg .logo{animation:float 4s ease-in-out infinite}
 .view.seen>div[style*="font-size:52px"],.view.seen>div[style*="font-size:56px"]{animation:none}
 .smE{display:inline-block;font-style:normal;line-height:1;margin-right:5px}
@@ -306,10 +308,12 @@ settings(){return `<h2 style="margin:6px 2px 14px">Settings</h2><div class="card
 <div class="set" data-help="hsell"><span>💼</span><div><b>How to sell</b><small>Got accounts or stock to sell?</small></div></div>
 <div class="set" data-s="out"><span>🚪</span><div><b>Log out</b><small>Sign out from this device</small></div></div></div>`},
 login(){return `<div class="lg"><div class="logo">${LOGO}</div><h1>Prime Store</h1><div class="mut" style="text-align:center">Telegram account store</div><div class="card" style="margin-top:20px"><div class="tabs"><span class="on">Telegram</span><span>Email</span><span>Phone</span></div><button class="btn" id="tg">${brand("tg")}Continue with Telegram</button><div class="mut" id="lmsg" style="text-align:center;margin:12px 0">The bot will send you your ID and password.</div><div class="mut" style="text-align:center">or log in with your ID and password</div><input id="uid" inputmode="numeric" placeholder="Telegram user ID" style="margin:10px 0"><input id="upw" type="password" placeholder="Password" autocomplete="current-password" style="margin-bottom:10px"><button class="btn ghost" id="go">Log in</button></div></div>`}};
-let RO,LASTKEY=null,FIRST=true;
+let RO,LASTKEY=null,FIRST=true,SWAP=false;
+/* animate only the freshly swapped items (filter / country-type / stock switch), once, never the whole page */
+function swap(list){[...list].forEach((e,i)=>{const d=Math.min(i,8)*35;e.style.setProperty("--d",d+"ms");e.classList.remove("swi");void e.offsetWidth;e.classList.add("swi");setTimeout(()=>{e.classList.remove("swi");e.style.removeProperty("--d")},700+d)})}
 /* One id per "page". The reveal plays once when you navigate INTO a page; re-renders of that same page (refresh, Get code, polling, filters) never replay it. */
-function vkey(){try{if(!S.user)return"login";if(!S.sub)return"t:"+S.tab;const x=S.sub==="pay"?PY.m+"|"+PY.step+"|"+(PY.res?1:0):S.sub==="buytg"?TB.k+"|"+(TB.res?1:0):S.sub==="help"?HP:"";return"s:"+S.sub+":"+x}catch(e){return"x"}}
-function stagger(){if(RO)RO.disconnect();const k=vkey();FIRST=k!==LASTKEY;LASTKEY=k;if(!FIRST){const w=document.querySelector("#app .view");if(w)w.classList.add("seen");return}
+function vkey(){try{if(!S.user)return"login";if(!S.sub)return"t:"+S.tab;const x=S.sub==="smm"?(SM.res?"res":SM.pick?"p-"+SM.pick:"form"):S.sub==="order"?(S.od?(S.od.err?"err":"ok"):"load"):S.sub==="pay"?PY.m+"|"+PY.step+"|"+(PY.res?1:0):S.sub==="buytg"?TB.k+"|"+(TB.res?1:0):S.sub==="help"?HP:"";return"s:"+S.sub+":"+x}catch(e){return"x"}}
+function stagger(){if(RO)RO.disconnect();const k=vkey();FIRST=k!==LASTKEY;LASTKEY=k;const sw=SWAP;SWAP=false;if(!FIRST){const w=document.querySelector("#app .view");if(w)w.classList.add("seen");if(sw){swap(document.querySelectorAll("#cg>*,#app .view .card>.item"))}return}
 if(!("IntersectionObserver" in window))return;
 const els=[...document.querySelectorAll("#app .view>*:not(.g2):not(.lg):not(br), #app .g2>*, #app .lg>*:not(.logo), #app .item, #app .sel, #app .set, #app .kv")];
 els.forEach(e=>e.classList.add("rv"));
@@ -328,7 +332,7 @@ function sheet(h){const o=document.createElement("div");o.className="ov";o.inner
 function buy(k){return openBuy(k);toast("Opening the bot to complete your order");setTimeout(()=>open(botUrl(),"_blank"),600)}
 document.addEventListener("click",e=>{const t=e.target.closest("[data-go],[data-buy],[data-m],[data-a],[data-s],[data-k],#tg,#go,#pay,#rf");if(!t)return;
 if(t.dataset.go)return go(t.dataset.go);
-if(t.dataset.k){S.kind=t.dataset.k;C=S.kind==="wa"?S.wa:S.tg;return render()}
+if(t.dataset.k){S.kind=t.dataset.k;C=S.kind==="wa"?S.wa:S.tg;SWAP=true;return render()}
 if(t.dataset.buy)return buy(t.dataset.buy);
 if(t.dataset.m){S.meth=t.dataset.m;document.querySelectorAll(".meth").forEach(x=>x.classList.toggle("on",x.dataset.m===S.meth));return}
 if(t.dataset.a){$("#amt").value=t.dataset.a;S.amt=+t.dataset.a;$("#pa").textContent=S.amt;return}
@@ -535,8 +539,8 @@ document.addEventListener("pointermove",e=>{if(el)set(el,e.clientX,e.clientY)});
 const up=()=>{if(!el)return;const t=el;el=null;t.style.transition="transform .6s cubic-bezier(.34,1.56,.64,1)";t.style.transform=""};
 ["pointerup","pointercancel"].forEach(n=>document.addEventListener(n,up))})();
 document.addEventListener("click",e=>{const t=e.target.closest("[data-stk],[data-of]");if(!t)return;
-if(t.dataset.stk){S.stock=!S.stock;ST.set("ps_stock",S.stock);t.querySelector(".sw").classList.toggle("on",S.stock);const g=$("#cg");if(g)g.innerHTML=buyRows();return}
-if(t.dataset.of){S.of=t.dataset.of;render()}});
+if(t.dataset.stk){S.stock=!S.stock;ST.set("ps_stock",S.stock);t.querySelector(".sw").classList.toggle("on",S.stock);const g=$("#cg");if(g){g.innerHTML=buyRows();swap(g.children)}return}
+if(t.dataset.of){S.of=t.dataset.of;SWAP=true;render()}});
 let bk=0,exitArm=0,armed=0;const TH=[];
 /* Chrome (Android) skips history entries that a page adds before the user touched it,
    so the back-guard is only pushed after a real touch/click, never on page load. */
