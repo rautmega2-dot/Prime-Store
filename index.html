@@ -645,7 +645,7 @@ let bk=0,exitArm=0,gd=0,need=0,leaving=0;const TH=[];
 /* Chrome ignores history entries added without a touch, so guard entries are added on real touches
    (and re-added after every back press). gd counts them so a real exit can step over all of them. */
 function trap(){try{history.pushState({ps:1},"");gd++}catch(e){}}
-function arm(){if(!S.user)return;if(gd<1||(need&&gd<4)){need=0;trap()}}
+function arm(){if(!S.user)return;if(gd<4){while(gd<9)trap()}}
 function appBack(){const ov=document.querySelector(".ov");if(ov){ov.remove();return true}
 if(!S.user)return false;
 if(S.sub){const b=document.querySelector("#app .top .ic[data-pb]");if(b)b.click();return true}
@@ -654,11 +654,11 @@ if(S.tab!=="home"){go.nb=1;go("home");go.nb=0;return true}
 return false}
 function initBack(){if(bk)return;bk=1;
 ["pointerup","touchend","click","keydown"].forEach(n=>addEventListener(n,arm,true));
-if(navigator.userActivation&&navigator.userActivation.hasBeenActive)trap();
+if(navigator.userActivation&&navigator.userActivation.hasBeenActive)arm();
 addEventListener("popstate",()=>{if(leaving)return;gd=Math.max(0,gd-1);
-if(appBack()){trap();need=1;return}
-if(exitArm){leaving=1;const n=gd;gd=0;if(n>0){history.go(-n);setTimeout(()=>history.back(),120)}else history.back();return}
-exitArm=1;toast("Press back again to exit");setTimeout(()=>{exitArm=0},2200);trap();need=1})}
+if(appBack()){if(gd<1)trap();return}
+if(exitArm){leaving=1;const n=gd;gd=0;setTimeout(()=>{leaving=0},1500);if(n>0){history.go(-n);setTimeout(()=>history.back(),120)}else history.back();return}
+exitArm=1;toast("Press back again to exit");setTimeout(()=>{exitArm=0},2200);if(gd<1)trap()})}
 
 ["gesturestart","gesturechange","gestureend"].forEach(n=>document.addEventListener(n,e=>e.preventDefault()));
 document.addEventListener("touchmove",e=>{if(e.touches&&e.touches.length>1)e.preventDefault()},{passive:false});
