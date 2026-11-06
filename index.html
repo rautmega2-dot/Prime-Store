@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Prime Store</title>
 <style>
 :root{--bg1:#FBF8FF;--bg2:#EADFFF;--ink:#2B2147;--mut:#7A6F9C;--pri:#7B5CF0;--pri2:#9B82FF;--btn1:#B9A4FF;--btn2:#7B5CF0;--btnink:#fff;--acc:#FF9ACB;--card:rgba(255,255,255,.88);--navbg:rgba(255,255,255,.95);--line:rgba(123,92,240,.14);--ok:#14a077;--bad:#e0436a;--sh:0 10px 26px rgba(123,92,240,.14);--glow:rgba(123,92,240,.30);--blob:#D6C6FF;--blob2:#FFD3EA;--ease:cubic-bezier(.22,1,.36,1);--spring:cubic-bezier(.34,1.56,.64,1);color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -312,6 +312,20 @@ nav i{border-radius:34px}
 .hrow>div{text-align:right}
 .g2.tiles{margin-top:0;margin-bottom:14px}
 .card.hi h1{font-size:28px}
+
+/* wide social media card */
+.soc{cursor:pointer;padding:20px 18px 18px}
+.soc:active{transform:scale(.97)}
+.socr{display:flex;align-items:center;gap:14px}
+.socr>div{flex:1;min-width:0}.socr b{display:block;font-size:18px;line-height:1.2}.socr .mut{display:block;margin-top:3px}
+.soc .em{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;font-size:28px;flex:none;background:radial-gradient(circle at 30% 22%,rgba(255,255,255,.45),transparent 50%),linear-gradient(135deg,var(--btn1),var(--btn2));box-shadow:0 8px 20px var(--glow);animation:bob 3.6s ease-in-out infinite}
+.soc .ico{display:flex;justify-content:space-between;gap:6px;margin:20px 2px 4px}
+.soc .ico svg.brand{box-sizing:content-box;width:30px;height:30px;padding:8px;margin:0;vertical-align:baseline;border-radius:50%;background:radial-gradient(circle at 30% 25%,var(--sph),var(--cardbot) 80%);box-shadow:0 8px 12px -5px var(--shd),inset 0 -3px 6px var(--inb);animation:bob 3.6s ease-in-out infinite}
+.soc .ico svg.brand:nth-child(2){animation-delay:-.7s}.soc .ico svg.brand:nth-child(3){animation-delay:-1.4s}.soc .ico svg.brand:nth-child(4){animation-delay:-2.1s}.soc .ico svg.brand:nth-child(5){animation-delay:-2.8s}
+.socgo{margin-top:16px;text-align:center;padding:12px;border-radius:999px;font-weight:700;color:var(--btnink);background:linear-gradient(135deg,var(--btn1),var(--btn2));box-shadow:0 10px 18px -6px var(--glow),inset 0 2px 0 rgba(255,255,255,.35),inset 0 -3px 6px rgba(60,25,140,.16)}
+/* no zoom */
+html,body{touch-action:pan-x pan-y;-webkit-text-size-adjust:100%}
+input,select,textarea{font-size:16px}
 </style>
 </head>
 <body>
@@ -349,7 +363,7 @@ const KLAB={tg:"Telegram",wa:"WhatsApp",smm:"Social media"};
 const V={
 home(){const n=S.user.name;return `<div class="top"><button class="ic" data-go="settings" aria-label="Settings">⚙</button><b>${BRAND}</b><span class="sp"></span><div class="logo">${LOGO}</div></div>
 <div class="card hero"><div class="hrow"><button class="btn" data-go="recharge">+ Add balance</button><div><span class="mut">Total balance</span><div class="big" id="bal">${f(S.bal)}</div><div class="mut hsub">${f2(S.bal)}</div></div></div><div class="hst"><div><span>Total recharges</span><b>${S.tops.length}</b></div><div><span>Total orders</span><b>${S.orders.length}</b></div></div></div>
-<div class="g2 tiles"><div class="card sq alt" data-go="orders"><span class="em">📦</span><div><b>My Orders</b><span class="mut">${S.orders.length} total · track status</span></div></div><div class="card sq" data-smm="1"><span class="em">🚀</span><div><b>Social Media Services</b><span class="mut">Followers, likes, views and more</span></div></div></div>
+<div class="card soc" data-smm="1"><div class="socr"><span class="em">🚀</span><div><b>Social Media Services</b><span class="mut">Followers, likes, views and more</span></div></div><div class="ico">${brand("wa")}${brand("ig")}${brand("yt")}${brand("tt")}${brand("fb")}</div><div class="socgo">Order from here →</div></div>
 <div class="card hi"><span class="mut">Welcome back,</span><h1>${n}</h1><div class="mut" style="margin-top:6px">Fast and secure account buying. Pick a country to see live stock and price.</div></div>
 <div class="row"><h3>Available countries</h3><a data-go="buy">View all</a></div>
 <div class="g2">${C.slice(0,4).map(cardC).join("")}</div>`},
@@ -489,7 +503,7 @@ const ICON={Received:"✅",Bought:"📱",Failed:"❌"};
 const sIcon=(k,st)=>{const l=String(st||"").toLowerCase();if(k==="smm")return l==="completed"?"✅":["canceled","cancelled","refunded","fail","failed","rejected"].includes(l)?"❌":l==="partial"?"⚠️":"⏳";return ICON[st]||"⏳"};
 const ob=(k,t)=>S.odb&&S.odk===k?LD:t;
 const kv=(a,b,c)=>b===""||b==null?"":`<div class="kv"><span>${a}</span><b>${b}${c||""}</b></div>`;
-V.order=()=>{const d=S.od,t=topBar("Order details","orders");if(!d)return t+SKEL;if(d.err)return t+`<div class="card bad" style="text-align:center">${esc(d.err)}</div>`;
+V.order=()=>{const d=S.od,t=topBar("Order details","odback");if(!d)return t+SKEL;if(d.err)return t+`<div class="card bad" style="text-align:center">${esc(d.err)}</div>`;
 const when=new Date(d.created).toLocaleString(),b=S.odb?"disabled":"";
 const head=`<div style="text-align:center;font-size:52px;padding:4px 0 2px">${sIcon(d.k,d.status)}</div><h2 style="text-align:center;margin-bottom:14px">${brand(d.k==="smm"?"smm":d.k==="wa"?"wa":"tg")}${d.k==="smm"?"Order status":d.k==="wa"?"WhatsApp order":"Number order"}</h2>`;
 if(d.k==="smm")return t+head+`<div class="card" style="padding:4px 16px">${kv("Service",esc(d.name))}${kv("Platform",esc(d.plat))}${kv("Status",esc(d.status),"")}${kv("Quantity",d.qty)}${kv("Charged",f(d.cost))}${kv("Start",esc(d.start||"—"))}${kv("Remains",d.remains)}${kv("Refunded",d.refunded?"Yes · "+f(d.refunded):"No")}</div>
@@ -497,7 +511,7 @@ if(d.k==="smm")return t+head+`<div class="card" style="padding:4px 16px">${kv("S
 <div class="card mut">ℹ️ ${esc(d.note)}</div>${d.canRefill?`<button class="btn" id="odl" ${b}>${ob("refill","🔁 Request refill")}</button>`:""}<button class="btn ${d.canRefill?"ghost sm":""}" id="odr" ${b}>${ob("refresh","🔄 Refresh")}</button>`;
 return t+head+`<div class="card" style="padding:4px 16px">${kv("Order ID",esc(d.oid),cpb(d.oid))}${kv("Country",esc(d.name))}${kv("Number",esc(d.number),d.number?cpb(d.number):"")}${kv("Line",esc(d.op))}${kv("Paid",f(d.cost))}${kv("Status",esc(d.status))}${kv("Placed",esc(when))}${kv("Code",esc(d.code),d.code?cpb(d.code):"")}${kv("Password",esc(d.pass),d.pass?cpb(d.pass):"")}${d.refunded?kv("Refunded",f(d.refunded)):""}</div>${d.note?`<div class="card mut">ℹ️ ${esc(d.note)}</div>`:""}${d.canCode?`<button class="btn" id="odc" ${b}>${ob("code","📩 Get code")}</button>`:""}${d.canCancel?`<button class="btn ghost sm" id="odx" ${b}>${ob("cancel","❌ Cancel &amp; refund")}</button>`:""}<button class="btn ${d.canCode?"ghost sm":""}" id="odr" ${b}>${ob("refresh","🔄 Refresh")}</button>`};
 async function getOrder(k,i){const r=await fetch("/api/data?order="+k+":"+i);const d=await r.json().catch(()=>({}));return r.ok?d:{err:d.error||"Order not found"}}
-async function openOrder(k,i){S.sub="order";S.od=null;S.odb=false;render();scrollTo({top:0});try{S.od=await getOrder(k,i)}catch(e){S.od={err:"Could not load. Please try again."}}if(S.sub==="order")render();watchOrder()}
+async function openOrder(k,i){if(S.sub!=="order"){S.odFrom=S.sub||null;S.odTab=S.tab}S.sub="order";S.od=null;S.odb=false;render();scrollTo({top:0});try{S.od=await getOrder(k,i)}catch(e){S.od={err:"Could not load. Please try again."}}if(S.sub==="order")render();watchOrder()}
 let odT=0;function watchOrder(){clearInterval(odT);const d=S.od;if(!d||d.err||d.k!=="wa"||!d.canCode)return;odT=setInterval(async()=>{if(S.sub!=="order"||!S.od||S.odb||S.od.rid!==d.rid)return clearInterval(odT);try{const n=await getOrder("wa",d.rid);if(!n.err&&S.sub==="order"&&!S.odb){S.od=n;if(!n.canCode)clearInterval(odT);render()}}catch(e){}},8000)}
 async function odAction(kind){const d=S.od;if(!d||S.odb)return;S.odb=true;S.odk=kind;render();
 try{if(kind==="cancel"){if(!confirm("Cancel this number? If no code has arrived, your money goes back to your wallet."))throw new Error("");const j=await act({action:"wa_cancel",rid:d.rid});const r=await jobWait(j.id);toast(r.status==="done"?(r.note||"Done"):(r.error||"Please try again"))}else if(kind==="code"){const j=await act({action:d.k==="wa"?"wa_code":"tg_code",rid:d.rid});const r=await jobWait(j.id);toast(r.status==="done"?"✅ Code received":(r.error||"Please try again"))}else if(d.k==="smm"&&(kind==="refill"||d.canRefresh)){const j=await act({action:kind==="refill"?"refill":"refresh",rid:d.rid});const r=await jobWait(j.id);toast(r.status==="done"?(r.note||"Updated"):(r.error||"Please try again"))}else toast("Updated");
@@ -512,7 +526,7 @@ if(t.id==="sgo"){if(t.dataset.fund){S.sub=null;return go("recharge")}return smmP
 if(t.dataset.pick!==undefined){SM.pick=t.dataset.pick;SM.q="";render();return scrollTo({top:0})}
 if(t.dataset.pb!==undefined){const v=t.dataset.pb;if(v==="pick"){SM.pick=null;return render()}if(v==="toplat"){SM.pick="plat";SM.q="";render();return scrollTo({top:0})}if(v==="again")return smmOpen();if(v==="hmenu"){HP="hmenu";render();return scrollTo({top:0})}
 if(v==="paydone"){clearInterval(PY.t);S.sub=null;S.tab="recharge";render();return scrollTo({top:0})}
-if(v==="payback"){if(PY.step==="pay"&&PY.m!=="bpay"&&!PY.res){clearInterval(PY.t);PY.step="amt";PY.err="";PY.inv=null;return render()}clearInterval(PY.t);S.sub=null;S.tab="recharge";render();return scrollTo({top:0})}if(v==="orders"){S.sub=null;S.tab="orders";render();return scrollTo({top:0})}S.sub=null;render();return scrollTo({top:0})}
+if(v==="payback"){if(PY.step==="pay"&&PY.m!=="bpay"&&!PY.res){clearInterval(PY.t);PY.step="amt";PY.err="";PY.inv=null;return render()}clearInterval(PY.t);S.sub=null;S.tab="recharge";render();return scrollTo({top:0})}if(v==="odback"){clearInterval(odT);if(S.odFrom&&S.odFrom!=="order"){S.sub=S.odFrom}else{S.sub=null;S.tab=S.odTab||"orders"}render();return scrollTo({top:0})}if(v==="orders"){S.sub=null;S.tab="orders";render();return scrollTo({top:0})}S.sub=null;render();return scrollTo({top:0})}
 if(t.dataset.sp!==undefined)return pickPlat(t.dataset.sp);
 if(t.dataset.ss!==undefined){const s=(SM.list||[]).find(x=>String(x.id)===t.dataset.ss);if(s){SM.svc=s;SM.pick=null;render();scrollTo({top:0})}}});
 document.addEventListener("input",e=>{const i=e.target.id;if(i==="psq"){SM.q=e.target.value;$("#pl").innerHTML=pickRows()}else if(i==="sl")SM.link=e.target.value;else if(i==="sn"){SM.qty=e.target.value;smmCalc()}});
@@ -614,7 +628,7 @@ hsell:["How to sell",()=>{const u=CF().support;return `<div class="mut" style="m
 V.help=()=>{const h=HELP[HP]||HELP.help;return topBar(h[0],HP==="hmenu"?"exit":"hmenu")+h[1]()};
 
 document.addEventListener("pointerdown",e=>{const b=e.target.closest(".btn:not(:disabled)");if(!b)return;const r=b.getBoundingClientRect(),d=Math.max(r.width,r.height)*1.6,s=document.createElement("span");s.className="rp";s.style.cssText="width:"+d+"px;height:"+d+"px;left:"+(e.clientX-r.left-d/2)+"px;top:"+(e.clientY-r.top-d/2)+"px";b.appendChild(s);setTimeout(()=>s.remove(),700)});
-(function(){const sel=".cn,.sq,.hero,.stat,.meth,.ord";let el=null;
+(function(){const sel=".cn,.sq,.soc,.hero,.stat,.meth,.ord";let el=null;
 const set=(t,x,y)=>{const r=t.getBoundingClientRect(),px=(x-r.left)/r.width-.5,py=(y-r.top)/r.height-.5;t.style.transform="perspective(600px) rotateX("+(-py*7).toFixed(1)+"deg) rotateY("+(px*7).toFixed(1)+"deg) scale(.98)"};
 document.addEventListener("pointerdown",e=>{const t=e.target.closest(sel);if(!t||e.target.closest("button,input,select"))return;el=t;t.style.transition="transform .12s";set(t,e.clientX,e.clientY)});
 document.addEventListener("pointermove",e=>{if(el)set(el,e.clientX,e.clientY)});
@@ -623,11 +637,11 @@ const up=()=>{if(!el)return;const t=el;el=null;t.style.transition="transform .6s
 document.addEventListener("click",e=>{const t=e.target.closest("[data-stk],[data-of]");if(!t)return;
 if(t.dataset.stk){S.stock=!S.stock;ST.set("ps_stock",S.stock);t.querySelector(".sw").classList.toggle("on",S.stock);const g=$("#cg");if(g){g.innerHTML=buyRows();swap(g.children)}return}
 if(t.dataset.of){S.of=t.dataset.of;SWAP=true;render()}});
-let bk=0,exitArm=0,armed=0;const TH=[];
-/* Chrome (Android) skips history entries that a page adds before the user touched it,
-   so the back-guard is only pushed after a real touch/click, never on page load. */
-function trap(){if(armed)return;try{history.pushState({ps:1},"");armed=1}catch(e){}}
-function arm(){if(S.user)trap()}
+let bk=0,exitArm=0,gd=0,need=0,leaving=0;const TH=[];
+/* Chrome ignores history entries added without a touch, so guard entries are added on real touches
+   (and re-added after every back press). gd counts them so a real exit can step over all of them. */
+function trap(){try{history.pushState({ps:1},"");gd++}catch(e){}}
+function arm(){if(!S.user)return;if(gd<1||(need&&gd<4)){need=0;trap()}}
 function appBack(){const ov=document.querySelector(".ov");if(ov){ov.remove();return true}
 if(!S.user)return false;
 if(S.sub){const b=document.querySelector("#app .top .ic[data-pb]");if(b)b.click();return true}
@@ -637,8 +651,14 @@ return false}
 function initBack(){if(bk)return;bk=1;
 ["pointerup","touchend","click","keydown"].forEach(n=>addEventListener(n,arm,true));
 if(navigator.userActivation&&navigator.userActivation.hasBeenActive)trap();
-addEventListener("popstate",()=>{armed=0;if(appBack()){trap();return}if(exitArm){exitArm=0;history.back();return}exitArm=1;toast("Press back again to exit");setTimeout(()=>{exitArm=0},2200);trap()})}
+addEventListener("popstate",()=>{if(leaving)return;gd=Math.max(0,gd-1);
+if(appBack()){trap();need=1;return}
+if(exitArm){leaving=1;const n=gd;gd=0;if(n>0){history.go(-n);setTimeout(()=>history.back(),120)}else history.back();return}
+exitArm=1;toast("Press back again to exit");setTimeout(()=>{exitArm=0},2200);trap();need=1})}
 
+["gesturestart","gesturechange","gestureend"].forEach(n=>document.addEventListener(n,e=>e.preventDefault()));
+document.addEventListener("touchmove",e=>{if(e.touches&&e.touches.length>1)e.preventDefault()},{passive:false});
+document.addEventListener("wheel",e=>{if(e.ctrlKey)e.preventDefault()},{passive:false});
 boot();
 </script>
 </body>
