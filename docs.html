@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Telegram Accounts API | Prime Store</title>
+<meta name="description" content="Prime Store Telegram Accounts API: buy Telegram numbers and fetch login codes from your own server.">
+<style>
+:root{--bg1:#FBF8FF;--bg2:#EADFFF;--ink:#2B2147;--mut:#6F6494;--pri:#7B5CF0;--btn1:#B9A4FF;--btn2:#7B5CF0;--card:rgba(255,255,255,.88);--line:rgba(123,92,240,.16);--code:#F1EBFF;--codeink:#2B2147;--ok:#14a077;--bad:#d03a63;--warn:#9a6a00;--warnbg:rgba(255,190,60,.16);--sh:0 10px 26px rgba(123,92,240,.12);color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg1:#1A1330;--bg2:#0D0919;--ink:#F2EDFF;--mut:#B9ABE6;--pri:#C3B1FF;--card:rgba(242,237,255,.07);--line:rgba(242,237,255,.14);--code:#120D24;--codeink:#EDE7FF;--ok:#5bd69b;--bad:#ff7d9d;--warn:#ffd27a;--warnbg:rgba(255,190,60,.12);--sh:0 10px 26px rgba(0,0,0,.4);color-scheme:dark}}
+:root[data-theme="dark"]{--bg1:#1A1330;--bg2:#0D0919;--ink:#F2EDFF;--mut:#B9ABE6;--pri:#C3B1FF;--card:rgba(242,237,255,.07);--line:rgba(242,237,255,.14);--code:#120D24;--codeink:#EDE7FF;--ok:#5bd69b;--bad:#ff7d9d;--warn:#ffd27a;--warnbg:rgba(255,190,60,.12);--sh:0 10px 26px rgba(0,0,0,.4);color-scheme:dark}
+html{scroll-padding-top:70px;background:var(--bg1)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;min-height:100%;font:15px/1.55 "Trebuchet MS","Segoe UI",system-ui,sans-serif;color:var(--ink);background:linear-gradient(160deg,var(--bg1),var(--bg2)) fixed;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg1);z-index:20}
+a{color:var(--pri)}
+main{max-width:760px;margin:0 auto;padding:18px 16px 70px}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:22px}
+header.top b{font-size:17px}
+.tbtn{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;padding:8px 12px;font:inherit;cursor:pointer}
+h1{font-size:28px;line-height:1.15;margin:0 0 8px;letter-spacing:-.02em}
+h2{font-size:20px;margin:34px 0 8px;letter-spacing:-.01em}
+h3{font-size:16px;margin:20px 0 6px}
+p{margin:6px 0 10px}
+.mut{color:var(--mut)}
+.lead{font-size:16px;color:var(--mut);margin:0 0 18px}
+.base{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;box-shadow:var(--sh)}
+.base small{color:var(--mut);display:block}
+.base code{font:600 13px/1.4 ui-monospace,Menlo,Consolas,monospace;word-break:break-all}
+.base>div{flex:1;min-width:0}
+nav.toc{display:flex;gap:8px;overflow-x:auto;padding:14px 0 2px;margin:0 -16px;padding-left:16px;padding-right:16px;scrollbar-width:none}
+nav.toc::-webkit-scrollbar{display:none}
+nav.toc a{flex:none;text-decoration:none;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:7px 13px;font-size:14px}
+nav.toc a:hover,nav.toc a:focus-visible{border-color:var(--pri);outline:none}
+.get{display:inline-block;background:var(--btn2);color:#fff;border-radius:8px;padding:2px 9px;font:700 12px/1.6 ui-monospace,Menlo,Consolas,monospace;margin-right:8px;vertical-align:2px}
+.note{border:1px solid var(--line);border-left:4px solid var(--pri);background:var(--card);border-radius:12px;padding:10px 14px;margin:12px 0}
+.note.warn{border-left-color:#e0a21a;background:var(--warnbg)}
+.note b{display:block}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--card);margin:10px 0}
+table{border-collapse:collapse;width:100%;min-width:420px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top;font-size:14px}
+tr:last-child td{border-bottom:0}
+th{color:var(--mut);font-weight:600}
+td code,p code,li code{font:13px ui-monospace,Menlo,Consolas,monospace;background:var(--code);color:var(--codeink);border-radius:6px;padding:1px 6px}
+.yes{color:var(--ok);font-weight:700}
+.cb{position:relative;margin:10px 0}
+.cb pre{margin:0;background:var(--code);color:var(--codeink);border:1px solid var(--line);border-radius:14px;padding:14px 14px;overflow-x:auto;font:13px/1.55 ui-monospace,Menlo,Consolas,monospace}
+.cb button{position:absolute;top:8px;right:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:9px;padding:4px 10px;font:12px inherit;font-family:inherit;cursor:pointer}
+.cb pre{padding-right:70px}
+.lbl{font-weight:700;margin:14px 0 2px;font-size:14px}
+ul{padding-left:20px;margin:6px 0}
+li{margin:3px 0}
+footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);color:var(--mut);font-size:14px}
+button:focus-visible,a:focus-visible{outline:2px solid var(--pri);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<main>
+<header class="top">
+  <b>Prime Store</b>
+  <button class="tbtn" id="theme" type="button" aria-label="Switch light or dark theme">Theme</button>
+</header>
+
+<h1>Telegram Accounts API</h1>
+<p class="lead">Buy Telegram account numbers and fetch their login codes from your own server. Every call is a GET request that returns JSON. Prices and balance are in INR.</p>
+<div class="note"><b>This API is for the Telegram service only.</b>Other services in the Prime Store bot are not available through it. You can still use them in the bot as usual.</div>
+
+<div class="base">
+  <div><small>Base URL</small><code id="baseTxt">http://145.239.65.118:20060</code></div>
+  <button class="tbtn" type="button" data-copy-id="baseTxt">Copy</button>
+</div>
+
+<nav class="toc" aria-label="Sections">
+  <a href="#start">Get started</a>
+  <a href="#security">Security</a>
+  <a href="#country_info">Country info</a>
+  <a href="#available">Available countries</a>
+  <a href="#balance">Balance</a>
+  <a href="#buy">Buy number</a>
+  <a href="#code">Get code</a>
+  <a href="#errors">Errors</a>
+  <a href="#examples">Examples</a>
+  <a href="#support">Support</a>
+</nav>
+
+<h2 id="start">Get started</h2>
+<p>Your <code>apiKey</code> and <code>YourID</code> are in the bot under Menu → API. Send both with every request. The flow for one account is:</p>
+<ul>
+  <li>Call <code>getNumber</code> to buy a number.</li>
+  <li>Log in to Telegram with that number.</li>
+  <li>Call <code>getCode</code> until the code arrives.</li>
+</ul>
+
+<h2 id="security">Security</h2>
+<div class="note warn"><b>Call the API from your own server only.</b>Your key is part of every request, so anything running on the user’s side, such as a browser or a mobile app, can reveal it.</div>
+<ul>
+  <li>Open Menu → API → IP whitelist and add your server’s IP address. The key then works only from that address, even if it leaks.</li>
+  <li>If you think the key was exposed, tap Regenerate API key on the same screen.</li>
+  <li>Keep the key in an environment variable, and do not print full request URLs in your logs.</li>
+  <li>This API currently runs over plain HTTP, so the whitelist matters. Use it.</li>
+</ul>
+
+<h2 id="country_info">Get country information</h2>
+<p><span class="get">GET</span><code>action=country_info</code></p>
+<p>Returns stock and price for one country. Without <code>country_code</code> you get every country.</p>
+<div class="tw"><table>
+<tr><th>Parameter</th><th>Type</th><th>Required</th></tr>
+<tr><td><code>apiKey</code></td><td>String</td><td class="yes">Yes</td></tr>
+<tr><td><code>YourID</code></td><td>String</td><td class="yes">Yes</td></tr>
+<tr><td><code>country_code</code></td><td>String</td><td>No</td></tr>
+</table></div>
+<div class="lbl">All countries</div>
+<div class="cb"><pre><code><span class="u">?action=country_info&amp;apiKey=YOUR_API_KEY&amp;YourID=Your_ID</span></code></pre><button type="button" data-copy>Copy</button></div>
+<div class="lbl">One country</div>
+<div class="cb"><pre><code><span class="u">?action=country_info&amp;apiKey=YOUR_API_KEY&amp;YourID=Your_ID&amp;country_code=uz</span></code></pre><button type="button" data-copy>Copy</button></div>
+<div class="lbl">Response</div>
+<div class="cb"><pre><code>{
+  "status": "ok",
+  "name": "Uzbekistan 🇺🇿",
+  "code_Num": "40",
+  "code": "UZ",
+  "qty": 6450,
+  "price": "75"
+}</code></pre><button type="button" data-copy>Copy</button></div>
+
+<h2 id="available">Get available countries</h2>
+<p><span class="get">GET</span><code>action=available_countries</code></p>
+<p>Lists the countries that have numbers in stock right now.</p>
+<div class="tw"><table>
+<tr><th>Parameter</th><th>Type</th><th>Required</th></tr>
+<tr><td><code>apiKey</code></td><td>String</td><td class="yes">Yes</td></tr>
+<tr><td><code>YourID</code></td><td>String</td><td class="yes">Yes</td></tr>
+</table></div>
+<div class="cb"><pre><code><span class="u">?action=available_countries&amp;apiKey=YOUR_API_KEY&amp;YourID=Your_ID</span></code></pre><button type="button" data-copy>Copy</button></div>
+<div class="lbl">Response</div>
+<div class="cb"><pre><code>{
+  "status": "ok",
+  "countries": {
+    "UA": {"name": "Ukraine 🇺🇦", "code_Num": "1", "code": "UA", "qty": 425, "price": "135"},
+    "TR": {"name": "Türkiye 🇹🇷", "code_Num": "62", "code": "TR", "qty": 1601, "price": "90"},
+    "HK": {"name": "Hong Kong 🇭🇰", "code_Num": "14", "code": "HK", "qty": 365, "price": "59"}
+  }
+}</code></pre><button type="button" data-copy>Copy</button></div>
+
+<h2 id="balance">Get account balance</h2>
+<p><span class="get">GET</span><code>action=get_balance</code></p>
+<div class="tw"><table>
+<tr><th>Parameter</th><th>Type</th><th>Required</th></tr>
+<tr><td><code>apiKey</code></td><td>String</td><td class="yes">Yes</td></tr>
+<tr><td><code>YourID</code></td><td>String</td><td class="yes">Yes</td></tr>
+</table></div>
+<div class="cb"><pre><code><span class="u">?action=get_balance&amp;apiKey=YOUR_API_KEY&amp;YourID=Your_ID</span></code></pre><button type="button" data-copy>Copy</button></div>
+<div class="lbl">Response</div>
+<div class="cb"><pre><code>{
+  "status": "ok",
+  "balance": "260.50 INR"
+}</code></pre><button type="button" data-copy>Copy</button></div>
+
+<h2 id="buy">Buy number</h2>
+<p><span class="get">GET</span><code>action=getNumber</code></p>
+<p>Buys a phone number from one country. The price is taken from your balance. If no number could be bought, you are not charged.</p>
+<div class="tw"><table>
+<tr><th>Parameter</th><th>Type</th><th>Required</th></tr>
+<tr><td><code>apiKey</code></td><td>String</td><td class="yes">Yes</td></tr>
+<tr><td><code>YourID</code></td><td>String</td><td class="yes">Yes</td></tr>
+<tr><td><code>country_code</code></td><td>String</td><td class="yes">Yes</td></tr>
+<tr><td><code>maxPrice</code></td><td>String</td><td>No</td></tr>
+</table></div>
+<p><code>maxPrice</code> is in INR. If the price is higher, nothing is bought.</p>
+<div class="cb"><pre><code><span class="u">?action=getNumber&amp;apiKey=YOUR_API_KEY&amp;YourID=Your_ID&amp;country_code=uz</span></code></pre><button type="button" data-copy>Copy</button></div>
+<div class="lbl">Response</div>
+<div class="cb"><pre><code>{
+  "status": "ok",
+  "name": "Uzbekistan 🇺🇿",
+  "Number": "+99800000000",
+  "price": "75",
+  "new_balance": 140.5
+}</code></pre><button type="button" data-copy>Copy</button></div>
+
+<h2 id="code">Get code</h2>
+<p><span class="get">GET</span><code>action=getCode</code></p>
+<p>Returns the login code for a number. Log in with the number in Telegram first, then call this. If the code has not arrived yet you get <code>code_not_received</code>: wait a few seconds and call again. A received code stays available for 30 minutes.</p>
+<div class="tw"><table>
+<tr><th>Parameter</th><th>Type</th><th>Required</th></tr>
+<tr><td><code>apiKey</code></td><td>String</td><td class="yes">Yes</td></tr>
+<tr><td><code>YourID</code></td><td>String</td><td class="yes">Yes</td></tr>
+<tr><td><code>number</code></td><td>String</td><td class="yes">Yes</td></tr>
+</table></div>
+<div class="cb"><pre><code><span class="u">?action=getCode&amp;number=+99800000000&amp;apiKey=YOUR_API_KEY&amp;YourID=Your_ID</span></code></pre><button type="button" data-copy>Copy</button></div>
+<div class="lbl">Response</div>
+<div class="cb"><pre><code>{
+  "status": "ok",
+  "Number": "+99800000000",
+  "code": "47607",
+  "pass": "2345GD8R"
+}</code></pre><button type="button" data-copy>Copy</button></div>
+<p><code>pass</code> is the account’s two-step password. It is empty when the account has none.</p>
+
+<h2 id="errors">Errors</h2>
+<p>When something goes wrong the answer has <code>"status": "error"</code>, a short code and a readable message. The HTTP status matches.</p>
+<div class="cb"><pre><code>{
+  "status": "error",
+  "code": "insufficient_balance",
+  "message": "Not enough balance. Add funds in the bot first."
+}</code></pre><button type="button" data-copy>Copy</button></div>
+<div class="tw"><table>
+<tr><th>HTTP</th><th>code</th><th>Meaning</th></tr>
+<tr><td>400</td><td><code>missing_parameter</code> <code>invalid_parameter</code> <code>invalid_action</code></td><td>A parameter is missing or wrong</td></tr>
+<tr><td>401</td><td><code>invalid_credentials</code></td><td>apiKey or YourID is wrong</td></tr>
+<tr><td>402</td><td><code>insufficient_balance</code></td><td>Your balance is too low</td></tr>
+<tr><td>403</td><td><code>ip_not_allowed</code></td><td>The key is right, but your server’s IP is not on its whitelist</td></tr>
+<tr><td>404</td><td><code>country_not_found</code> <code>number_not_found</code> <code>code_not_received</code></td><td>Nothing found, or the code has not arrived yet</td></tr>
+<tr><td>409</td><td><code>out_of_stock</code> <code>price_too_high</code> <code>no_number</code> <code>order_not_active</code></td><td>The request can’t be done right now. You are not charged</td></tr>
+<tr><td>410</td><td><code>code_expired</code></td><td>The code is no longer available</td></tr>
+<tr><td>429</td><td><code>too_many_requests</code> <code>busy</code></td><td>Too many requests: wait a little</td></tr>
+<tr><td>503</td><td><code>service_unavailable</code> <code>order_checking</code></td><td>Service is busy. <code>order_checking</code> means the order is being checked: do not retry, contact support</td></tr>
+</table></div>
+
+<h2 id="examples">Examples</h2>
+<div class="lbl">curl</div>
+<div class="cb"><pre><code>curl "<span class="b">http://145.239.65.118:20060</span>?action=getNumber&amp;apiKey=YOUR_API_KEY&amp;YourID=Your_ID&amp;country_code=uz"</code></pre><button type="button" data-copy>Copy</button></div>
+<div class="lbl">Python</div>
+<div class="cb"><pre><code>import requests, time
+
+BASE = "<span class="b">http://145.239.65.118:20060</span>"
+AUTH = {"apiKey": "YOUR_API_KEY", "YourID": "Your_ID"}
+
+r = requests.get(BASE, params={"action": "getNumber", "country_code": "uz", **AUTH}).json()
+if r["status"] == "ok":
+    number = r["Number"]
+    for _ in range(30):                      # wait for the code
+        c = requests.get(BASE, params={"action": "getCode", "number": number, **AUTH}).json()
+        if c["status"] == "ok":
+            print(c["code"], c["pass"])
+            break
+        time.sleep(5)
+else:
+    print(r["code"], r["message"])</code></pre><button type="button" data-copy>Copy</button></div>
+
+<h2 id="support">Support</h2>
+<p>Message us on Telegram: <a id="sup" href="https://t.me/Spidey1Sprt" rel="noopener">@Spidey1Sprt</a></p>
+
+<footer>Prime Store · Telegram Accounts API</footer>
+</main>
+
+<script>
+/* Change this one line when you move the API to a domain or HTTPS.
+   Every URL on the page updates from it. */
+const BASE = "http://145.239.65.118:20060";
+
+(function(){
+  var strip = function(s){ return String(s).replace(/\/+$/, ""); };
+  var base = strip(BASE);
+  var bt = document.getElementById("baseTxt");
+  if (bt) bt.textContent = base;
+  document.querySelectorAll(".b").forEach(function(e){ e.textContent = base; });
+  document.querySelectorAll(".u").forEach(function(e){ e.textContent = base + e.textContent; });
+
+  function copy(text, btn){
+    var done = function(){ var o = btn.textContent; btn.textContent = "Copied"; setTimeout(function(){ btn.textContent = o; }, 1200); };
+    try { navigator.clipboard.writeText(text).then(done, fallback); } catch(e){ fallback(); }
+    function fallback(){
+      try {
+        var t = document.createElement("textarea");
+        t.value = text; t.style.position = "fixed"; t.style.opacity = "0";
+        document.body.appendChild(t); t.select(); document.execCommand("copy"); t.remove(); done();
+      } catch(e){}
+    }
+  }
+  document.querySelectorAll("[data-copy]").forEach(function(b){
+    b.addEventListener("click", function(){ copy(b.parentNode.querySelector("pre").innerText, b); });
+  });
+  document.querySelectorAll("[data-copy-id]").forEach(function(b){
+    b.addEventListener("click", function(){ copy(document.getElementById(b.dataset.copyId).textContent, b); });
+  });
+
+  var root = document.documentElement, tb = document.getElementById("theme");
+  try { var saved = localStorage.getItem("theme"); if (saved) root.setAttribute("data-theme", saved); } catch(e){}
+  tb.addEventListener("click", function(){
+    var dark = root.getAttribute("data-theme") ? root.getAttribute("data-theme") === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    var next = dark ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("theme", next); } catch(e){}
+  });
+})();
+</script>
+</body>
+</html>
