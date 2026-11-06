@@ -43,10 +43,9 @@ tr:last-child td{border-bottom:0}
 th{color:var(--mut);font-weight:600}
 td code,p code,li code{font:13px ui-monospace,Menlo,Consolas,monospace;background:var(--code);color:var(--codeink);border-radius:6px;padding:1px 6px}
 .yes{color:var(--ok);font-weight:700}
-.cb{position:relative;margin:10px 0}
-.cb pre{margin:0;background:var(--code);color:var(--codeink);border:1px solid var(--line);border-radius:14px;padding:14px 14px;overflow-x:auto;font:13px/1.55 ui-monospace,Menlo,Consolas,monospace}
-.cb button{position:absolute;top:8px;right:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:9px;padding:4px 10px;font:12px inherit;font-family:inherit;cursor:pointer}
-.cb pre{padding-right:70px}
+.cb{display:flex;flex-direction:column-reverse;margin:10px 0}
+.cb pre{margin:0;background:var(--code);color:var(--codeink);border:1px solid var(--line);border-radius:14px;padding:14px;white-space:pre-wrap;overflow-wrap:anywhere;font:13px/1.55 ui-monospace,Menlo,Consolas,monospace}
+.cb button{align-self:flex-end;margin-bottom:6px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:9px;padding:5px 12px;font-size:13px;font-family:inherit;cursor:pointer}
 .lbl{font-weight:700;margin:14px 0 2px;font-size:14px}
 ul{padding-left:20px;margin:6px 0}
 li{margin:3px 0}
