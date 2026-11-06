@@ -394,7 +394,7 @@ let RO,LASTKEY=null,FIRST=true,SWAP=false;
 function swap(list){[...list].forEach((e,i)=>{const d=Math.min(i,8)*35;e.style.setProperty("--d",d+"ms");e.classList.remove("swi");void e.offsetWidth;e.classList.add("swi");setTimeout(()=>{e.classList.remove("swi");e.style.removeProperty("--d")},700+d)})}
 /* One id per "page". The reveal plays once when you navigate INTO a page; re-renders of that same page (refresh, Get code, polling, filters) never replay it. */
 function vkey(){try{if(!S.user)return"login";if(!S.sub)return"t:"+S.tab;const x=S.sub==="smm"?(SM.res?"res":SM.pick?"p-"+SM.pick:"form"):S.sub==="order"?(S.od?(S.od.err?"err":"ok"):"load"):S.sub==="pay"?PY.m+"|"+PY.step+"|"+(PY.res?1:0):S.sub==="buytg"?TB.k+"|"+(TB.res?1:0):S.sub==="help"?HP:"";return"s:"+S.sub+":"+x}catch(e){return"x"}}
-function stagger(){if(RO)RO.disconnect();const k=vkey();FIRST=k!==LASTKEY;LASTKEY=k;const sw=SWAP;SWAP=false;if(!FIRST){const w=document.querySelector("#app .view");if(w)w.classList.add("seen");if(sw){swap(document.querySelectorAll("#cg>*,#app .view .card>.item"))}return}
+function stagger(){try{arm()}catch(e){}if(RO)RO.disconnect();const k=vkey();FIRST=k!==LASTKEY;LASTKEY=k;const sw=SWAP;SWAP=false;if(!FIRST){const w=document.querySelector("#app .view");if(w)w.classList.add("seen");if(sw){swap(document.querySelectorAll("#cg>*,#app .view .card>.item"))}return}
 if(!("IntersectionObserver" in window))return;
 const els=[...document.querySelectorAll("#app .view>*:not(.g2):not(.lg):not(br), #app .g2>*, #app .lg>*:not(.logo), #app .item, #app .sel, #app .set, #app .kv")];
 els.forEach(e=>e.classList.add("rv"));
@@ -645,7 +645,9 @@ let bk=0,exitArm=0,gd=0,need=0,leaving=0;const TH=[];
 /* Chrome ignores history entries added without a touch, so guard entries are added on real touches
    (and re-added after every back press). gd counts them so a real exit can step over all of them. */
 function trap(){try{history.pushState({ps:1},"");gd++}catch(e){}}
-function arm(){if(!S.user)return;if(gd<4){while(gd<9)trap()}}
+/* keep (at least) as many history guards as the app has "back" steps, so the phone's back button always has an entry to pop inside the site */
+function stepsDeep(){return(document.querySelector(".ov")?1:0)+(S.sub?4:0)+TH.length+(S.tab!=="home"?1:0)+1}
+function arm(){if(!S.user)return;const n=Math.min(stepsDeep(),14);while(gd<n)trap()}
 function appBack(){const ov=document.querySelector(".ov");if(ov){ov.remove();return true}
 if(!S.user)return false;
 if(S.sub){const b=document.querySelector("#app .top .ic[data-pb]");if(b)b.click();return true}
