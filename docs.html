@@ -66,7 +66,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--pri);outline-offset
 <div class="note"><b>This API is for the Telegram service only.</b>Other services in the Prime Store bot are not available through it. You can still use them in the bot as usual.</div>
 
 <div class="base">
-  <div><small>Base URL</small><code id="baseTxt">http://145.239.65.118:20060</code></div>
+  <div><small>Base URL</small><code id="baseTxt">https://primestoreapi.erenlabs.xyz:20060</code></div>
   <button class="tbtn" type="button" data-copy-id="baseTxt">Copy</button>
 </div>
 
@@ -97,7 +97,7 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--pri);outline-offset
   <li>Open Menu → API → IP whitelist and add your server’s IP address. The key then works only from that address, even if it leaks.</li>
   <li>If you think the key was exposed, tap Regenerate API key on the same screen.</li>
   <li>Keep the key in an environment variable, and do not print full request URLs in your logs.</li>
-  <li>This API currently runs over plain HTTP, so the whitelist matters. Use it.</li>
+  <li>Your API key is part of every request, so the whitelist matters. Use it.</li>
 </ul>
 
 <h2 id="country_info">Get country information</h2>
@@ -218,11 +218,11 @@ button:focus-visible,a:focus-visible{outline:2px solid var(--pri);outline-offset
 
 <h2 id="examples">Examples</h2>
 <div class="lbl">curl</div>
-<div class="cb"><pre><code>curl "<span class="b">http://145.239.65.118:20060</span>?action=getNumber&amp;apiKey=YOUR_API_KEY&amp;YourID=Your_ID&amp;country_code=uz"</code></pre><button type="button" data-copy>Copy</button></div>
+<div class="cb"><pre><code>curl "<span class="b">https://primestoreapi.erenlabs.xyz:20060</span>?action=getNumber&amp;apiKey=YOUR_API_KEY&amp;YourID=Your_ID&amp;country_code=uz"</code></pre><button type="button" data-copy>Copy</button></div>
 <div class="lbl">Python</div>
 <div class="cb"><pre><code>import requests, time
 
-BASE = "<span class="b">http://145.239.65.118:20060</span>"
+BASE = "<span class="b">https://primestoreapi.erenlabs.xyz:20060</span>"
 AUTH = {"apiKey": "YOUR_API_KEY", "YourID": "Your_ID"}
 
 r = requests.get(BASE, params={"action": "getNumber", "country_code": "uz", **AUTH}).json()
@@ -246,7 +246,7 @@ else:
 <script>
 /* Change this one line when you move the API to a domain or HTTPS.
    Every URL on the page updates from it. */
-const BASE = "http://145.239.65.118:20060";
+const BASE = "https://primestoreapi.erenlabs.xyz:20060";
 
 (function(){
   var strip = function(s){ return String(s).replace(/\/+$/, ""); };
