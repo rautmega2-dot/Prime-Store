@@ -21,6 +21,16 @@ module.exports = async (req, res) => {
   if (!u) return res.status(401).json({ bot });
   try {
     const db = await L.db();
+    // the API key of this user: /api/data?api=1  (only accounts connected to Telegram have one; it is the same key as in the bot)
+    if (req.query && req.query.api) {
+      if (L.isWeb(u.id)) return res.json({ tg: false, bot });
+      const k = await db.collection("api_keys").findOne({ _id: u.id });
+      return res.json({
+        tg: true, bot, id: u.id, key: (k && k.key) || "",
+        ips: String((k && k.ips) || "").split(",").map((x) => x.trim()).filter(Boolean),
+        base: process.env.API_BASE_URL || "",
+      });
+    }
     // the services of one platform (loaded when the user opens it): /api/data?plat=instagram
     const pk = req.query && req.query.plat;
     if (pk) {
