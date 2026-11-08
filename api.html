@@ -4,32 +4,50 @@
 <title>Prime Store | API key</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-:root{--bg:#f6f7fb;--card:#fff;--tx:#1b1f2a;--mut:#667085;--ac:#6d3df5;--bd:#e4e7ee;--code:#f0f2f8;--ok:#16a34a;--er:#dc2626}
-@media (prefers-color-scheme:dark){:root{--bg:#10131a;--card:#181c26;--tx:#e8ebf3;--mut:#9aa3b5;--ac:#a78bfa;--bd:#262b38;--code:#0d1017;--ok:#4ade80;--er:#f87171}}
-a{color:var(--ac)}.b{color:#fff}.b.o{color:var(--ac)}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
-.w{max-width:620px;margin:0 auto;padding:20px 16px 60px}
-h1{font-size:24px;margin:6px 0 4px}h2{font-size:17px;margin:0 0 8px}p{margin:8px 0}.mut{color:var(--mut)}
-.c{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;margin:14px 0}
-.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.v{flex:1;min-width:0;background:var(--code);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;font:13px ui-monospace,Menlo,Consolas,monospace;word-break:break-all}
-button,.b{font:inherit;font-weight:600;border:0;border-radius:10px;padding:9px 14px;background:var(--ac);color:#fff;text-decoration:none;display:inline-block;cursor:pointer}
-button.o,.b.o{background:transparent;color:var(--ac);border:1px solid var(--ac)}button.d{background:var(--er)}button:disabled{opacity:.55}
-input{font:inherit;width:100%;background:var(--code);color:var(--tx);border:1px solid var(--bd);border-radius:10px;padding:10px 12px}
-.chip{display:inline-block;background:var(--code);border:1px solid var(--bd);border-radius:999px;padding:2px 10px;margin:0 6px 6px 0;font:13px ui-monospace,Menlo,Consolas,monospace}
-#msg{min-height:20px;margin:8px 0;font-weight:600}.ok{color:var(--ok)}.er{color:var(--er)}
-.l{font-size:13px;color:var(--mut);margin:12px 0 4px}
-</style></head><body><div class="w">
-<h1>API key</h1>
-<p class="mut">Use the Prime Store API from your own server. <a href="/docs.html">Read the API docs</a> · <a href="/">Back to the site</a></p>
+:root{--bg1:#FBF8FF;--bg2:#EADFFF;--ink:#2B2147;--mut:#7A6F9C;--pri:#7B5CF0;--btn1:#B9A4FF;--btn2:#7B5CF0;--card:rgba(255,255,255,.88);--line:rgba(123,92,240,.14);--ok:#14a077;--bad:#e0436a;--sh:0 10px 26px rgba(123,92,240,.14);--glow:rgba(123,92,240,.30);--in:#EFE8FF;--bar:rgba(251,248,255,.92);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg1:#1A1330;--bg2:#0D0919;--ink:#F2EDFF;--mut:#B9ABE6;--pri:#C3B1FF;--btn1:#A48CFF;--btn2:#6B47F0;--card:rgba(242,237,255,.07);--line:rgba(242,237,255,.13);--ok:#5bd69b;--bad:#ff7d9d;--sh:0 10px 26px rgba(0,0,0,.45);--glow:rgba(155,130,255,.3);--in:rgba(0,0,0,.28);--bar:rgba(26,19,48,.92);color-scheme:dark}}
+:root[data-theme="dark"]{--bg1:#1A1330;--bg2:#0D0919;--ink:#F2EDFF;--mut:#B9ABE6;--pri:#C3B1FF;--btn1:#A48CFF;--btn2:#6B47F0;--card:rgba(242,237,255,.07);--line:rgba(242,237,255,.13);--ok:#5bd69b;--bad:#ff7d9d;--sh:0 10px 26px rgba(0,0,0,.45);--glow:rgba(155,130,255,.3);--in:rgba(0,0,0,.28);--bar:rgba(26,19,48,.92);color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;background:var(--bg1)}
+body{margin:0;min-height:100vh;font:15px/1.45 "Trebuchet MS","Segoe UI",system-ui,sans-serif;color:var(--ink);background:linear-gradient(160deg,var(--bg1),var(--bg2)) fixed;overflow-x:hidden;touch-action:manipulation;padding-bottom:env(safe-area-inset-bottom,0px)}
+.top{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:10px;padding:calc(10px + env(safe-area-inset-top,0px)) 14px 10px;background:var(--bar);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.top h1{flex:1;margin:0;font-size:19px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rd{width:42px;height:42px;flex:none;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:20px;line-height:1;padding:0;display:grid;place-items:center;box-shadow:var(--sh)}
+.pill{flex:none;border-radius:999px;padding:9px 14px;font-weight:700;font-size:14px;color:var(--pri);background:var(--card);border:1px solid var(--line);text-decoration:none;box-shadow:var(--sh)}
+.w{max-width:560px;margin:0 auto;padding:14px 14px 50px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:28px;padding:18px;margin-bottom:14px;box-shadow:var(--sh)}
+h2{font-size:17px;margin:0 0 4px}p{margin:8px 0}.mut{color:var(--mut)}
+.l{font-size:13px;font-weight:700;color:var(--mut);margin:16px 0 6px;letter-spacing:.2px}
+.v{background:var(--in);border:1px solid var(--line);border-radius:16px;padding:12px 14px;font:14px/1.4 ui-monospace,Menlo,Consolas,monospace;word-break:break-all;overflow-wrap:anywhere}
+.row{display:flex;gap:8px;margin-top:8px}.row>*{flex:1}
+button{font-weight:700;font-size:15px;line-height:1;font-family:inherit;border:0;border-radius:16px;padding:13px 14px;color:#fff;background:linear-gradient(135deg,var(--btn1),var(--btn2));box-shadow:0 8px 20px var(--glow);cursor:pointer}
+button.o{background:var(--card);color:var(--pri);border:1px solid var(--line);box-shadow:none}
+button.d{background:linear-gradient(135deg,#ff7d9d,#e0436a);box-shadow:0 8px 20px rgba(224,67,106,.3)}
+button:disabled{opacity:.55}button:active{transform:scale(.98)}
+input{font-size:16px;font-family:inherit;width:100%;color:var(--ink);background:var(--in);border:1px solid var(--line);border-radius:16px;padding:13px 14px;outline:0}
+input:focus{border-color:var(--pri)}
+.chip{display:inline-block;background:var(--in);border:1px solid var(--line);border-radius:999px;padding:4px 12px;margin:0 6px 6px 0;font:13px ui-monospace,Menlo,Consolas,monospace}
+#msg{position:sticky;top:calc(66px + env(safe-area-inset-top,0px));z-index:4;min-height:0}
+#msg:not(:empty){margin:0 0 12px;padding:11px 14px;border-radius:16px;font-weight:700;background:var(--card);border:1px solid var(--line);box-shadow:var(--sh)}
+.ok{color:var(--ok)}.er{color:var(--bad)}
+a{color:var(--pri)}
+</style></head><body>
+<div class="top"><button class="rd" id="back" aria-label="Back">←</button><h1>API key</h1><a class="pill" href="/docs.html">📖 Docs</a></div>
+<div class="w">
 <div id="msg" role="status"></div>
-<div id="box" class="c"><p class="mut">Loading…</p></div>
+<div id="box" class="card"><p class="mut">Loading…</p></div>
 </div>
 <script>
 const $=s=>document.querySelector(s);
+try{const d=JSON.parse(localStorage.getItem("ps_dark"));if(d===true||d===false)document.documentElement.setAttribute("data-theme",d?"dark":"light")}catch(e){}
 const msg=(t,ok)=>{const m=$("#msg");m.textContent=t||"";m.className=ok?"ok":"er"};
 const jpost=(url,b)=>fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b)}).then(async r=>{const d=await r.json().catch(()=>({}));if(!r.ok)throw Object.assign(new Error(d.error||"Something went wrong"),{status:r.status});return d});
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const tw=window.Telegram&&Telegram.WebApp;let tried=false;
+/* Back: to the page we came from, or to the site */
+function back(){let same=false;try{same=document.referrer&&new URL(document.referrer).origin===location.origin}catch(e){}if(same&&history.length>1)history.back();else location.href="/"}
+$("#back").addEventListener("click",back);
+if(tw&&tw.BackButton){try{tw.BackButton.show();tw.BackButton.onClick(back)}catch(e){}}
 /* the bot does the real work: leave a request, wait for the answer */
 async function run(body){
   const {id}=await jpost("/api/act",body);
@@ -49,7 +67,6 @@ function copy(t,done){
 const el=(tag,props={},kids=[])=>{const e=document.createElement(tag);for(const k in props){if(k==="text")e.textContent=props[k];else if(k==="on")for(const ev in props.on)e.addEventListener(ev,props.on[ev]);else e.setAttribute(k,props[k])}for(const c of [].concat(kids))if(c)e.append(c);return e};
 const box=$("#box");
 const say=(...kids)=>{box.replaceChildren(...kids)};
-const tw=window.Telegram&&Telegram.WebApp;let tried=false;
 
 async function load(){
   let d;
@@ -57,12 +74,12 @@ async function load(){
     const r=await fetch("/api/data?api=1");
     if(r.status===401){
       if(tw&&tw.initData&&!tried){tried=true;try{if(tw.ready)tw.ready();await jpost("/api/auth",{action:"tma",initData:tw.initData});return load()}catch(e){}}
-      return say(el("h2",{text:"Please log in"}),el("p",{class:"mut",text:"Log in to the site first, then open this page again."}),el("a",{class:"b",href:"/",text:"Open the site"}));
+      return say(el("h2",{text:"Please log in"}),el("p",{class:"mut",text:"Log in to the site first, then open this page again."}),el("div",{class:"row"},[el("button",{text:"Open the site",on:{click:()=>{location.href="/"}}})]));
     }
     d=await r.json();
     if(!r.ok)throw new Error(d.error||"Something went wrong");
   }catch(e){return say(el("p",{class:"er",text:"Could not load. Please refresh the page."}))}
-  if(!d.tg)return say(el("h2",{text:"Connect Telegram first"}),el("p",{class:"mut",text:"The API key is only for accounts that are connected to Telegram. On the site open Settings → Connect Telegram, then come back here."}),el("a",{class:"b",href:"/",text:"Open the site"}));
+  if(!d.tg)return say(el("h2",{text:"Connect Telegram first"}),el("p",{class:"mut",text:"The API key is only for accounts that are connected to Telegram. On the site open Settings → Connect Telegram, then come back here."}),el("div",{class:"row"},[el("button",{text:"Open the site",on:{click:()=>{location.href="/"}}})]));
   if(!d.key){try{const o=await run({action:"api_key"});d.key=o.key;d.ips=o.ips||[]}catch(e){return say(el("p",{class:"er",text:e.message}))}}
   draw(d);
 }
@@ -72,12 +89,12 @@ function draw(d){
   const keyBox=el("div",{class:"v"});
   const paint=()=>{keyBox.textContent=shown?d.key:"•".repeat(24)+d.key.slice(-4)};
   const toggle=el("button",{class:"o",text:"Show",on:{click:()=>{shown=!shown;toggle.textContent=shown?"Hide":"Show";paint()}}});paint();
-  const line=(label,val,btn,extra)=>[el("div",{class:"l",text:label}),el("div",{class:"row"},[val,...[].concat(btn||[])])].concat(extra||[]);
+  const cp=(label,get,done)=>el("button",{class:"o",text:label,on:{click:()=>copy(get(),done)}});
   const mono=t=>el("div",{class:"v",text:t});
   const base=d.base||"";
   const chips=el("div");
   const drawIps=()=>{chips.replaceChildren(...(d.ips.length?d.ips.map(i=>el("span",{class:"chip",text:i})):[el("span",{class:"mut",text:"Off: the key works from any IP address."})]))};drawIps();
-  const ipIn=el("input",{placeholder:"1 to 5 IPs, e.g. 123.45.67.89",autocomplete:"off",inputmode:"text"});
+  const ipIn=el("input",{placeholder:"1 to 5 IPs, e.g. 123.45.67.89",autocomplete:"off",autocapitalize:"off",spellcheck:"false"});
   const ipSave=el("button",{text:"Save",on:{click:async()=>{
     const v=ipIn.value.trim();if(!v)return msg("Enter an IP address, or tap Turn off.");
     ipSave.disabled=true;msg("");
@@ -85,22 +102,24 @@ function draw(d){
   const ipOff=el("button",{class:"o",text:"Turn off",on:{click:async()=>{
     ipOff.disabled=true;msg("");
     try{const o=await run({action:"api_ips",ips:"off"});d.ips=o.ips||[];drawIps();msg("IP whitelist is off",true)}catch(e){msg(e.message)}ipOff.disabled=false}}});
-  const regen=el("button",{class:"d",text:"Regenerate API key"});
-  const sure=el("div",{class:"row",style:"display:none;margin-top:8px"},[
-    el("span",{class:"mut",text:"The old key stops working at once. Sure?"}),
-    el("button",{class:"d",text:"Yes, regenerate",on:{click:async(ev)=>{
-      ev.target.disabled=true;msg("");
-      try{const o=await run({action:"api_regen"});d.key=o.key;d.ips=o.ips||d.ips;shown=true;toggle.textContent="Hide";paint();sure.style.display="none";regen.style.display="";msg("New API key is ready ✅ Update it in your system.",true)}catch(e){msg(e.message)}ev.target.disabled=false}}}),
-    el("button",{class:"o",text:"Cancel",on:{click:()=>{sure.style.display="none";regen.style.display=""}}})]);
-  regen.addEventListener("click",()=>{regen.style.display="none";sure.style.display="flex"});
+  const regen=el("button",{class:"d",text:"Regenerate API key",style:"width:100%;margin-top:8px"});
+  const sure=el("div",{style:"display:none;margin-top:8px"},[
+    el("p",{class:"mut",style:"margin:0 0 8px",text:"The old key stops working at once. Sure?"}),
+    el("div",{class:"row"},[
+      el("button",{class:"d",text:"Yes, regenerate",on:{click:async(ev)=>{
+        ev.target.disabled=true;msg("");
+        try{const o=await run({action:"api_regen"});d.key=o.key;d.ips=o.ips||d.ips;shown=true;toggle.textContent="Hide";paint();sure.style.display="none";regen.style.display="";msg("New API key is ready ✅ Update it in your system.",true)}catch(e){msg(e.message)}ev.target.disabled=false}}}),
+      el("button",{class:"o",text:"Cancel",on:{click:()=>{sure.style.display="none";regen.style.display=""}}})])]);
+  regen.addEventListener("click",()=>{regen.style.display="none";sure.style.display="block"});
   say(
     el("h2",{text:"Your API access"}),
-    ...line("YourID",mono(String(d.id)),el("button",{class:"o",text:"Copy",on:{click:()=>copy(String(d.id),"YourID copied")}})),
-    ...line("API key",keyBox,[toggle,el("button",{class:"o",text:"Copy",on:{click:()=>copy(d.key,"API key copied")}})]),
-    ...line("Base URL",mono(base||"Not set yet. Ask support."),base?el("button",{class:"o",text:"Copy",on:{click:()=>copy(base,"Base URL copied")}}):null),
+    el("p",{class:"mut",style:"margin:0",text:"Same key as in the bot."}),
+    el("div",{class:"l",text:"YourID"}),mono(String(d.id)),el("div",{class:"row"},[cp("Copy",()=>String(d.id),"YourID copied")]),
+    el("div",{class:"l",text:"API key"}),keyBox,el("div",{class:"row"},[toggle,cp("Copy",()=>d.key,"API key copied")]),
+    el("div",{class:"l",text:"Base URL"}),mono(base||"Not set yet. Ask support."),base?el("div",{class:"row"},[cp("Copy",()=>base,"Base URL copied")]):null,
     el("div",{class:"l",text:"IP whitelist (recommended)"}),chips,
-    el("div",{class:"row",style:"margin-top:6px"},[el("div",{style:"flex:1;min-width:180px"},[ipIn]),ipSave,ipOff]),
-    el("p",{class:"mut",text:"Add your server's public IP. Then the key works only from there, even if it leaks. This is the same key and whitelist as in the bot (Menu → API)."}),
+    el("div",{style:"margin-top:8px"},[ipIn]),el("div",{class:"row"},[ipSave,ipOff]),
+    el("p",{class:"mut",style:"font-size:13px",text:"Add your server's public IP. Then the key works only from there, even if it leaks."}),
     el("div",{class:"l",text:"If the key may have been exposed"}),regen,sure
   );
 }
