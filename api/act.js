@@ -12,7 +12,9 @@ const rid = (b) => { const r = int(b.rid); return r ? { rid: r } : null; };
 // POST {action: <name>, ...}  -> {id}                       (see JOBS below)
 // POST {action: "job", id}    -> {status, error, note, out}  status: new | working | done | error | checking | expired
 // Background helpers: they never move money, so they neither wait for nor block the one-request-at-a-time rule.
-const LIGHT = ["set_cur", "tos_ok", "join_check", "crypto_check", "smm_refresh"];
+const LIGHT = ["set_cur", "tos_ok", "join_check", "crypto_check", "smm_refresh", "api_key", "api_regen", "api_ips"];
+// The API key is only for accounts that are connected to Telegram (the bot checks this again).
+const API_JOBS = ["api_key", "api_regen", "api_ips"];
 
 const JOBS = {
   smm: ["smm", (b) => { const sid = int(b.service_id), qty = int(b.qty), cost = int(b.cost), link = str(b.link, /\S/, 400); return sid && qty && cost && link ? { sid, link, qty, cost } : null; }],
@@ -33,6 +35,10 @@ const JOBS = {
   tos_ok: ["tos_ok", () => ({})],
   join_check: ["join_check", () => ({})],
   crypto_check: ["crypto_check", (b) => { const track = str(b.track, /^[A-Za-z0-9_-]{4,64}$/, 64); return track ? { track } : null; }],
+  // API key (Telegram accounts only): make sure there is one / replace it / set the IP whitelist ("off" switches it off)
+  api_key: ["api_key", () => ({})],
+  api_regen: ["api_regen", () => ({})],
+  api_ips: ["api_ips", (b) => { const ips = str(b.ips, /^[0-9A-Fa-f:.,;\s]{2,200}$|^off$/i, 200); return ips ? { ips } : null; }],
 };
 
 module.exports = async (req, res) => {
@@ -56,6 +62,7 @@ module.exports = async (req, res) => {
 
     const def = JOBS[b.action];
     if (!def) return res.status(400).json({ error: "Bad request" });
+    if (API_JOBS.includes(def[0]) && L.isWeb(u.id)) return res.status(403).json({ error: "Connect Telegram first to get an API key." });
     const fields = def[1](b);
     if (!fields) return res.status(400).json({ error: "Please check what you entered." });
     // one request at a time per user, so a double tap can never run twice
