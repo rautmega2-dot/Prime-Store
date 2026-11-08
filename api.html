@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Prime Store | API key</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--tx:#1b1f2a;--mut:#667085;--ac:#6d3df5;--bd:#e4e7ee;--code:#f0f2f8;--ok:#16a34a;--er:#dc2626}
+@media (prefers-color-scheme:dark){:root{--bg:#10131a;--card:#181c26;--tx:#e8ebf3;--mut:#9aa3b5;--ac:#a78bfa;--bd:#262b38;--code:#0d1017;--ok:#4ade80;--er:#f87171}}
+a{color:var(--ac)}.b{color:#fff}.b.o{color:var(--ac)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
+.w{max-width:620px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:24px;margin:6px 0 4px}h2{font-size:17px;margin:0 0 8px}p{margin:8px 0}.mut{color:var(--mut)}
+.c{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;margin:14px 0}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.v{flex:1;min-width:0;background:var(--code);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;font:13px ui-monospace,Menlo,Consolas,monospace;word-break:break-all}
+button,.b{font:inherit;font-weight:600;border:0;border-radius:10px;padding:9px 14px;background:var(--ac);color:#fff;text-decoration:none;display:inline-block;cursor:pointer}
+button.o,.b.o{background:transparent;color:var(--ac);border:1px solid var(--ac)}button.d{background:var(--er)}button:disabled{opacity:.55}
+input{font:inherit;width:100%;background:var(--code);color:var(--tx);border:1px solid var(--bd);border-radius:10px;padding:10px 12px}
+.chip{display:inline-block;background:var(--code);border:1px solid var(--bd);border-radius:999px;padding:2px 10px;margin:0 6px 6px 0;font:13px ui-monospace,Menlo,Consolas,monospace}
+#msg{min-height:20px;margin:8px 0;font-weight:600}.ok{color:var(--ok)}.er{color:var(--er)}
+.l{font-size:13px;color:var(--mut);margin:12px 0 4px}
+</style></head><body><div class="w">
+<h1>API key</h1>
+<p class="mut">Use the Prime Store API from your own server. <a href="/docs.html">Read the API docs</a> · <a href="/">Back to the site</a></p>
+<div id="msg" role="status"></div>
+<div id="box" class="c"><p class="mut">Loading…</p></div>
+</div>
+<script>
+const $=s=>document.querySelector(s);
+const msg=(t,ok)=>{const m=$("#msg");m.textContent=t||"";m.className=ok?"ok":"er"};
+const jpost=(url,b)=>fetch(url,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b)}).then(async r=>{const d=await r.json().catch(()=>({}));if(!r.ok)throw Object.assign(new Error(d.error||"Something went wrong"),{status:r.status});return d});
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+/* the bot does the real work: leave a request, wait for the answer */
+async function run(body){
+  const {id}=await jpost("/api/act",body);
+  for(let i=0;i<30;i++){
+    await sleep(1000);
+    const j=await jpost("/api/act",{action:"job",id});
+    if(j.status==="done")return j.out||{};
+    if(["error","expired","checking"].includes(j.status))throw new Error(j.error||"The bot did not answer. Please try again.");
+  }
+  throw new Error("The bot did not answer in time. Please try again.");
+}
+function copy(t,done){
+  const ok=()=>msg(done||"Copied",true);
+  if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(t).then(ok,()=>fb());else fb();
+  function fb(){const a=document.createElement("textarea");a.value=t;a.style.position="fixed";a.style.opacity="0";document.body.appendChild(a);a.select();try{document.execCommand("copy");ok()}catch(e){msg("Could not copy. Select and copy it by hand.")}a.remove()}
+}
+const el=(tag,props={},kids=[])=>{const e=document.createElement(tag);for(const k in props){if(k==="text")e.textContent=props[k];else if(k==="on")for(const ev in props.on)e.addEventListener(ev,props.on[ev]);else e.setAttribute(k,props[k])}for(const c of [].concat(kids))if(c)e.append(c);return e};
+const box=$("#box");
+const say=(...kids)=>{box.replaceChildren(...kids)};
+const tw=window.Telegram&&Telegram.WebApp;let tried=false;
+
+async function load(){
+  let d;
+  try{
+    const r=await fetch("/api/data?api=1");
+    if(r.status===401){
+      if(tw&&tw.initData&&!tried){tried=true;try{if(tw.ready)tw.ready();await jpost("/api/auth",{action:"tma",initData:tw.initData});return load()}catch(e){}}
+      return say(el("h2",{text:"Please log in"}),el("p",{class:"mut",text:"Log in to the site first, then open this page again."}),el("a",{class:"b",href:"/",text:"Open the site"}));
+    }
+    d=await r.json();
+    if(!r.ok)throw new Error(d.error||"Something went wrong");
+  }catch(e){return say(el("p",{class:"er",text:"Could not load. Please refresh the page."}))}
+  if(!d.tg)return say(el("h2",{text:"Connect Telegram first"}),el("p",{class:"mut",text:"The API key is only for accounts that are connected to Telegram. On the site open Settings → Connect Telegram, then come back here."}),el("a",{class:"b",href:"/",text:"Open the site"}));
+  if(!d.key){try{const o=await run({action:"api_key"});d.key=o.key;d.ips=o.ips||[]}catch(e){return say(el("p",{class:"er",text:e.message}))}}
+  draw(d);
+}
+
+function draw(d){
+  let shown=false;
+  const keyBox=el("div",{class:"v"});
+  const paint=()=>{keyBox.textContent=shown?d.key:"•".repeat(24)+d.key.slice(-4)};
+  const toggle=el("button",{class:"o",text:"Show",on:{click:()=>{shown=!shown;toggle.textContent=shown?"Hide":"Show";paint()}}});paint();
+  const line=(label,val,btn,extra)=>[el("div",{class:"l",text:label}),el("div",{class:"row"},[val,...[].concat(btn||[])])].concat(extra||[]);
+  const mono=t=>el("div",{class:"v",text:t});
+  const base=d.base||"";
+  const chips=el("div");
+  const drawIps=()=>{chips.replaceChildren(...(d.ips.length?d.ips.map(i=>el("span",{class:"chip",text:i})):[el("span",{class:"mut",text:"Off: the key works from any IP address."})]))};drawIps();
+  const ipIn=el("input",{placeholder:"1 to 5 IPs, e.g. 123.45.67.89",autocomplete:"off",inputmode:"text"});
+  const ipSave=el("button",{text:"Save",on:{click:async()=>{
+    const v=ipIn.value.trim();if(!v)return msg("Enter an IP address, or tap Turn off.");
+    ipSave.disabled=true;msg("");
+    try{const o=await run({action:"api_ips",ips:v});d.ips=o.ips||[];drawIps();ipIn.value="";msg("IP whitelist saved ✅",true)}catch(e){msg(e.message)}ipSave.disabled=false}}});
+  const ipOff=el("button",{class:"o",text:"Turn off",on:{click:async()=>{
+    ipOff.disabled=true;msg("");
+    try{const o=await run({action:"api_ips",ips:"off"});d.ips=o.ips||[];drawIps();msg("IP whitelist is off",true)}catch(e){msg(e.message)}ipOff.disabled=false}}});
+  const regen=el("button",{class:"d",text:"Regenerate API key"});
+  const sure=el("div",{class:"row",style:"display:none;margin-top:8px"},[
+    el("span",{class:"mut",text:"The old key stops working at once. Sure?"}),
+    el("button",{class:"d",text:"Yes, regenerate",on:{click:async(ev)=>{
+      ev.target.disabled=true;msg("");
+      try{const o=await run({action:"api_regen"});d.key=o.key;d.ips=o.ips||d.ips;shown=true;toggle.textContent="Hide";paint();sure.style.display="none";regen.style.display="";msg("New API key is ready ✅ Update it in your system.",true)}catch(e){msg(e.message)}ev.target.disabled=false}}}),
+    el("button",{class:"o",text:"Cancel",on:{click:()=>{sure.style.display="none";regen.style.display=""}}})]);
+  regen.addEventListener("click",()=>{regen.style.display="none";sure.style.display="flex"});
+  say(
+    el("h2",{text:"Your API access"}),
+    ...line("YourID",mono(String(d.id)),el("button",{class:"o",text:"Copy",on:{click:()=>copy(String(d.id),"YourID copied")}})),
+    ...line("API key",keyBox,[toggle,el("button",{class:"o",text:"Copy",on:{click:()=>copy(d.key,"API key copied")}})]),
+    ...line("Base URL",mono(base||"Not set yet. Ask support."),base?el("button",{class:"o",text:"Copy",on:{click:()=>copy(base,"Base URL copied")}}):null),
+    el("div",{class:"l",text:"IP whitelist (recommended)"}),chips,
+    el("div",{class:"row",style:"margin-top:6px"},[el("div",{style:"flex:1;min-width:180px"},[ipIn]),ipSave,ipOff]),
+    el("p",{class:"mut",text:"Add your server's public IP. Then the key works only from there, even if it leaks. This is the same key and whitelist as in the bot (Menu → API)."}),
+    el("div",{class:"l",text:"If the key may have been exposed"}),regen,sure
+  );
+}
+load();
+</script></body></html>
