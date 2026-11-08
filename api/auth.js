@@ -20,6 +20,23 @@ const normPhone = (v) => {
 };
 const goodPw = (pw) => typeof pw === "string" && pw.length >= 6 && pw.length <= 100;
 
+// Telegram Mini App: checks the signed initData the app gives us and returns the Telegram user, or null.
+// Needs BOT_TOKEN (the same token as the bot) in the website's environment.
+const tmaUser = (raw) => {
+  const token = process.env.BOT_TOKEN;
+  if (!token || typeof raw !== "string" || raw.length > 4096) return null;
+  const p = new URLSearchParams(raw);
+  const h = p.get("hash");
+  if (!h) return null;
+  p.delete("hash");
+  const check = [...p.entries()].sort((a, b) => (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0)).map(([k, v]) => `${k}=${v}`).join("\n");
+  const key = crypto.createHmac("sha256", "WebAppData").update(token).digest();
+  if (!same(crypto.createHmac("sha256", key).update(check).digest("hex"), h)) return null;
+  const age = now() - Number(p.get("auth_date"));
+  if (!(age >= -60 && age < 86400)) return null; // taken within the last 24 hours
+  try { const u = JSON.parse(p.get("user") || ""); return Number.isInteger(u.id) && u.id > 0 && u.id < 9e12 ? u : null; } catch (e) { return null; }
+};
+
 let idxDone = false;
 async function ensureIdx(db) {
   if (idxDone) return;
@@ -63,9 +80,11 @@ async function newCode(db, extra) {
 
 // POST {action:"start"}                          -> new login code + link to the bot
 // POST {action:"poll", tok, sec}                 -> waits until the bot has confirmed that code, then logs in
+// POST {action:"tma", initData}                  -> inside the Telegram Mini App: logs in with the signed Telegram data
 // POST {action:"password", id, password}         -> login with the Telegram ID and password the bot gave
 // POST {action:"register", kind, ident, password}-> new account with email or phone (kind: "email" | "phone")
 // POST {action:"login", ident, password}         -> login with email or phone + password
+// POST {action:"chpw", old, password}            -> (logged in) change the password, the current one is required
 // POST {action:"link_start"}                     -> (logged in, no Telegram yet) code + bot link to connect Telegram and merge
 // DELETE                                         -> logout
 module.exports = async (req, res) => {
@@ -80,6 +99,32 @@ module.exports = async (req, res) => {
     const db = await L.db();
     await ensureIdx(db);
     const codes = db.collection("web_login"), users = db.collection("web_users");
+
+    if (b.action === "tma") {
+      const tu = tmaUser(b.initData);
+      if (!tu) return res.status(401).json({ error: "Telegram login failed. Please reopen the app from the bot." });
+      if (!allowed(tu.id)) return res.status(403).json({ error: "This site is not open yet" });
+      // first time here: the bot makes the website login and sends the welcome message (ID + password)
+      if (!(await users.findOne({ _id: tu.id }, { projection: { _id: 1 } }))) {
+        await db.collection("web_welcome").updateOne({ _id: tu.id }, { $setOnInsert: { t: now() } }, { upsert: true });
+      }
+      return finish(res, db, tu.id);
+    }
+
+    if (b.action === "chpw") {
+      const su = L.readSession(req);
+      if (!su) return res.status(401).json({ error: "Please log in again." });
+      const oldPw = b.old, newPw = b.password;
+      if (typeof oldPw !== "string" || !oldPw || oldPw.length > 100) return res.status(400).json({ error: "Enter your current password" });
+      if (!goodPw(newPw)) return res.status(400).json({ error: "New password must be 6 to 100 characters" });
+      if (oldPw === newPw) return res.status(400).json({ error: "The new password must be different" });
+      const w = await users.findOne({ _id: su.id });
+      if (!w) return res.status(404).json({ error: "No password is set yet. Open the bot and send /password." });
+      if (await rejectPw(res, users, w, oldPw, "Wrong current password")) return; // same lock-out as a login
+      const salt = rnd(16);
+      await users.updateOne({ _id: su.id }, { $set: { salt, hash: hash(newPw, salt), fails: 0, lock: 0 } });
+      return res.json({ ok: true });
+    }
 
     if (b.action === "start") {
       if (!process.env.BOT_USERNAME) return res.status(500).json({ error: "BOT_USERNAME is not set" });
