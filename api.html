@@ -20,6 +20,7 @@ h2{font-size:17px;margin:0 0 4px}p{margin:8px 0}.mut{color:var(--mut)}
 .l{font-size:13px;font-weight:700;color:var(--mut);margin:16px 0 6px;letter-spacing:.2px}
 .v{background:var(--in);border:1px solid var(--line);border-radius:16px;padding:12px 14px;font:14px/1.4 ui-monospace,Menlo,Consolas,monospace;word-break:break-all;overflow-wrap:anywhere}
 .row{display:flex;gap:8px;margin-top:8px}.row>*{flex:1}
+.line{display:flex;gap:8px;align-items:stretch}.line .v{flex:1;min-width:0}.line>button{flex:none;padding:13px 16px}.line.w2{flex-wrap:wrap}.line.w2>.in{flex:1;min-width:150px}
 button{font-weight:700;font-size:15px;line-height:1;font-family:inherit;border:0;border-radius:16px;padding:13px 14px;color:#fff;background:linear-gradient(135deg,var(--btn1),var(--btn2));box-shadow:0 8px 20px var(--glow);cursor:pointer}
 button.o{background:var(--card);color:var(--pri);border:1px solid var(--line);box-shadow:none}
 button.d{background:linear-gradient(135deg,#ff7d9d,#e0436a);box-shadow:0 8px 20px rgba(224,67,106,.3)}
@@ -111,14 +112,15 @@ function draw(d){
         try{const o=await run({action:"api_regen"});d.key=o.key;d.ips=o.ips||d.ips;shown=true;toggle.textContent="Hide";paint();sure.style.display="none";regen.style.display="";msg("New API key is ready ✅ Update it in your system.",true)}catch(e){msg(e.message)}ev.target.disabled=false}}}),
       el("button",{class:"o",text:"Cancel",on:{click:()=>{sure.style.display="none";regen.style.display=""}}})])]);
   regen.addEventListener("click",()=>{regen.style.display="none";sure.style.display="block"});
+  const line=(...k)=>el("div",{class:"line"},k);
   say(
     el("h2",{text:"Your API access"}),
     el("p",{class:"mut",style:"margin:0",text:"Same key as in the bot."}),
-    el("div",{class:"l",text:"YourID"}),mono(String(d.id)),el("div",{class:"row"},[cp("Copy",()=>String(d.id),"YourID copied")]),
-    el("div",{class:"l",text:"API key"}),keyBox,el("div",{class:"row"},[toggle,cp("Copy",()=>d.key,"API key copied")]),
-    el("div",{class:"l",text:"Base URL"}),mono(base||"Not set yet. Ask support."),base?el("div",{class:"row"},[cp("Copy",()=>base,"Base URL copied")]):null,
+    el("div",{class:"l",text:"YourID"}),line(mono(String(d.id)),cp("Copy",()=>String(d.id),"YourID copied")),
+    el("div",{class:"l",text:"API key"}),line(keyBox,toggle,cp("Copy",()=>d.key,"API key copied")),
+    el("div",{class:"l",text:"Base URL"}),line(...[mono(base||"Not set yet. Ask support."),base?cp("Copy",()=>base,"Base URL copied"):null].filter(Boolean)),
     el("div",{class:"l",text:"IP whitelist (recommended)"}),chips,
-    el("div",{style:"margin-top:8px"},[ipIn]),el("div",{class:"row"},[ipSave,ipOff]),
+    el("div",{class:"line w2",style:"margin-top:6px"},[el("div",{class:"in"},[ipIn]),ipSave,ipOff].map(x=>x)),
     el("p",{class:"mut",style:"font-size:13px",text:"Add your server's public IP. Then the key works only from there, even if it leaks."}),
     el("div",{class:"l",text:"If the key may have been exposed"}),regen,sure
   );
